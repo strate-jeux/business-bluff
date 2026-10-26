@@ -803,23 +803,7 @@ main{
     </div>
   </div>
 
-  <!-- Slide 9 : Performances des entreprises -->
-  <div class="slide scroll sj-hero">
-    <div class="sj-blob b1"></div>
-    <div class="sj-blob b2"></div>
-    <div class="relative z-10 max-w-7xl mx-auto px-4 md:px-6 pt-8 pb-10 w-full text-center">
-      <div class="sj-in sj-d1 mb-3"><span class="sj-badge"><span class="sj-dot"></span>3 ans plus tard</span></div>
-      <h2 class="sj-h2 sj-in sj-d2 mb-2">Performances des entreprises</h2>
-      <p class="sj-in sj-d2 text-lg opacity-90 mb-6">Appuie sur une carte pour découvrir son résultat</p>
-      <div class="flex flex-wrap gap-3 justify-center mb-8 sj-in sj-d3">
-        <button onclick="revealAllCompanies()" class="sj-cta pulse-animation" style="font-size:1.1rem; padding:.85rem 2rem;">Tout révéler ✨</button>
-        <button onclick="hideAllCompanies()" class="sj-btn sj-btn-ghost">↺ Retourner les cartes</button>
-      </div>
-      <div id="companies-grid" class="sj-in sj-d4"></div>
-    </div>
-  </div>
-
-  <!-- Slide 10 : Récapitulatif des collectes -->
+  <!-- Slide 9 : Récapitulatif des collectes -->
   <div class="slide scroll sj-hero" data-enter="summary">
     <div class="sj-blob b1"></div>
     <div class="sj-blob b2"></div>
@@ -832,6 +816,22 @@ main{
       <div class="sj-panel sj-in sj-d3">
         <div class="space-y-3" id="summaryList"></div>
       </div>
+    </div>
+  </div>
+
+  <!-- Slide 10 : Performances des entreprises -->
+  <div class="slide scroll sj-hero">
+    <div class="sj-blob b1"></div>
+    <div class="sj-blob b2"></div>
+    <div class="relative z-10 max-w-7xl mx-auto px-4 md:px-6 pt-8 pb-10 w-full text-center">
+      <div class="sj-in sj-d1 mb-3"><span class="sj-badge"><span class="sj-dot"></span>3 ans plus tard</span></div>
+      <h2 class="sj-h2 sj-in sj-d2 mb-2">Performances des entreprises</h2>
+      <p class="sj-in sj-d2 text-lg opacity-90 mb-6">Appuie sur une carte pour découvrir son résultat</p>
+      <div class="flex flex-wrap gap-3 justify-center mb-8 sj-in sj-d3">
+        <button onclick="revealAllCompanies()" class="sj-cta pulse-animation" style="font-size:1.1rem; padding:.85rem 2rem;">Tout révéler ✨</button>
+        <button onclick="hideAllCompanies()" class="sj-btn sj-btn-ghost">↺ Retourner les cartes</button>
+      </div>
+      <div id="companies-grid" class="sj-in sj-d4"></div>
     </div>
   </div>
 
@@ -1118,7 +1118,7 @@ main{
     generateInvestmentForms();
   }
 
-  /* Slide 9 : cartes des entreprises */
+  /* Slide 10 : cartes des entreprises */
   function generateCompanyCards() {
     const grid = document.getElementById("companies-grid");
     grid.innerHTML = "";
@@ -1174,7 +1174,7 @@ main{
     document.getElementById("company-modal").classList.remove("show");
   }
 
-  /* Slide 10 : récapitulatif des collectes */
+  /* Slide 9 : récapitulatif des collectes */
   function computeCompanyTotals() {
     return companies.map((company, index) => {
       let total = 0, count = 0;
