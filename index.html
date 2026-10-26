@@ -1,965 +1,1338 @@
 <!doctype html>
 <html lang="fr">
- <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Business Bluff - Diaporama Interactif</title>
-  <script src="/_sdk/element_sdk.js"></script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Business Bluff</title>
+
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
   <style>
-        body {
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
-        
-        .slide {
-            display: none;
-            height: 100%;
-            min-height: 100%;
-        }
-        
-        .slide.active {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .flip-card {
-            background-color: transparent;
-            width: 300px;
-            height: 400px;
-            perspective: 1000px;
-        }
-        
-        .flip-card-inner {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            text-align: center;
-            transition: transform 0.6s;
-            transform-style: preserve-3d;
-        }
-        
-        .flip-card.flipped .flip-card-inner {
-            transform: rotateY(180deg);
-        }
-        
-        .flip-card-front, .flip-card-back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        
-        .flip-card-back {
-            transform: rotateY(180deg);
-        }
-        
-        .navigation {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            display: flex;
-            gap: 10px;
-            z-index: 1000;
-        }
-        
-        .nav-btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
-            font-family: 'Poppins', sans-serif;
-        }
-        
-        .nav-btn:hover {
-            transform: translateY(-1px);
-        }
-        
-        .nav-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .timer-circle {
-            transform: rotate(-90deg);
-        }
-        
-        .investment-input {
-            width: 80px;
-            text-align: center;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 6px;
-            font-family: 'Poppins', sans-serif;
-        }
-        
-        .investment-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(41, 81, 197, 0.1);
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 2000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-        }
-        
-        .modal.show {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .company-flip-card {
-            background-color: transparent;
-            width: 280px;
-            height: 320px;
-            perspective: 1000px;
-        }
-        
-        .company-flip-card-inner {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            text-align: center;
-            transition: transform 0.6s;
-            transform-style: preserve-3d;
-        }
-        
-        .company-flip-card.flipped .company-flip-card-inner {
-            transform: rotateY(180deg);
-        }
-        
-        .company-flip-card-front, .company-flip-card-back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        
-        .company-flip-card-back {
-            transform: rotateY(180deg);
-        }
+    body { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
 
-        :root {
-            --background-color: #95B8E9;
-            --surface-color: #ffffff;
-            --text-color: #1F2937;
-            --primary-color: #2951C5;
-            --secondary-color: #6b7280;
-        }
-    </style>
-  <style>@view-transition { navigation: auto; }</style>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
- </head>
- <body class="font-poppins" id="main-body">
-  <main class="h-full min-h-full"><!-- Diapositive 1: Les rôles -->
-   <div id="slide1" class="slide active">
-    <header class="text-center py-8">
-     <h1 id="main-title" class="text-7xl font-bold mb-4">Business Bluff</h1>
-     <h2 id="subtitle-roles" class="text-3xl font-semibold mb-8">Les rôles</h2>
-    </header>
-    <div class="flex-1 flex items-center justify-center">
-     <div class="flex gap-12"><!-- Flip Card Entrepreneur -->
-      <div class="flip-card" onclick="flipCard('entrepreneur')">
-       <div class="flip-card-inner" id="entrepreneur-card">
-        <div class="flip-card-front card-surface p-6 flex flex-col items-center justify-center"><img src="https://lh3.googleusercontent.com/d/1PMacT71_VH1041j8cW8KKlOdllFbxmOH" alt="Entrepreneur" class="h-36 w-36 mb-4 object-cover rounded-lg" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-         <svg class="h-36 w-36 mb-4" style="display: none;" viewbox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg"><!-- Entrepreneur illustration de secours --> <circle cx="100" cy="100" r="95" fill="var(--primary-color)" opacity="0.1" /> <circle cx="100" cy="70" r="25" fill="#FBBF24" /> <path d="M75 55 Q100 45 125 55 Q120 40 100 40 Q80 40 75 55" fill="#8B4513" /> <circle cx="92" cy="68" r="2" fill="#000" /> <circle cx="108" cy="68" r="2" fill="#000" /> <path d="M90 78 Q100 85 110 78" stroke="#000" stroke-width="2" fill="none" /> <rect x="85" y="95" width="30" height="40" rx="5" fill="var(--primary-color)" /> <rect x="70" y="100" width="15" height="25" rx="7" fill="#FBBF24" /> <rect x="115" y="100" width="15" height="25" rx="7" fill="#FBBF24" /> <rect x="125" y="110" width="20" height="15" rx="2" fill="#8B4513" /> <rect x="127" y="112" width="16" height="2" fill="#D97706" /> <rect x="90" y="135" width="8" height="25" rx="4" fill="#1F2937" /> <rect x="102" y="135" width="8" height="25" rx="4" fill="#1F2937" /> <ellipse cx="94" cy="165" rx="8" ry="4" fill="#000" /> <ellipse cx="106" cy="165" rx="8" ry="4" fill="#000" /> <text x="50" y="50" font-size="20" fill="var(--primary-color)">
-           💰
-          </text> <text x="150" y="60" font-size="16" fill="var(--primary-color)">
-           📈
-          </text> <text x="40" y="150" font-size="18" fill="var(--primary-color)">
-           💡
-          </text>
-         </svg>
-         <h3 class="text-2xl font-bold mb-2 primary-text">Entrepreneur</h3>
-         <p class="text-sm secondary-text">Cliquez pour retourner</p>
-        </div>
-        <div class="flip-card-back card-surface p-6 flex flex-col justify-center">
-         <div class="text-left space-y-4">
-          <p class="font-semibold primary-text">Objectif :</p>
-          <p class="text-sm main-text">Convaincre les investisseurs d'investir le plus d'argent possible dans votre entreprise.</p>
-          <p class="font-semibold primary-text">Mission :</p>
-          <p class="text-sm main-text">Présenter votre activité, défendre vos chiffres et mettre en avant vos atouts. Trouvez la meilleure stratégie pour convaincre les investisseurs, quitte à jouer sur les apparences et le bluff !</p>
-         </div>
-        </div>
-       </div>
-      </div><!-- Flip Card Investisseur -->
-      <div class="flip-card" onclick="flipCard('investisseur')">
-       <div class="flip-card-inner" id="investisseur-card">
-        <div class="flip-card-front card-surface p-6 flex flex-col items-center justify-center"><img src="https://lh3.googleusercontent.com/d/1bLoXjxHqoC9Ht3_EkdKmDlR-4ITPK2u5" alt="Investisseur" class="h-36 w-36 mb-4 object-cover rounded-lg" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-         <svg class="h-36 w-36 mb-4" style="display: none;" viewbox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg"><!-- Investisseur illustration de secours --> <circle cx="100" cy="100" r="95" fill="var(--secondary-color)" opacity="0.1" /> <circle cx="100" cy="70" r="25" fill="#FBBF24" /> <path d="M75 55 Q100 40 125 55 Q125 45 100 45 Q75 45 75 55" fill="#4B5563" /> <circle cx="92" cy="68" r="8" fill="none" stroke="#000" stroke-width="2" /> <circle cx="108" cy="68" r="8" fill="none" stroke="#000" stroke-width="2" /> <line x1="100" y1="68" x2="100" y2="68" stroke="#000" stroke-width="2" /> <circle cx="92" cy="68" r="2" fill="#000" /> <circle cx="108" cy="68" r="2" fill="#000" /> <line x1="95" y1="78" x2="105" y2="78" stroke="#000" stroke-width="2" /> <rect x="85" y="95" width="30" height="40" rx="5" fill="#1F2937" /> <polygon points="100,95 95,105 105,105" fill="var(--primary-color)" /> <rect x="97" y="105" width="6" height="20" fill="var(--primary-color)" /> <rect x="70" y="100" width="15" height="25" rx="7" fill="#FBBF24" /> <rect x="115" y="100" width="15" height="25" rx="7" fill="#FBBF24" /> <rect x="125" y="105" width="18" height="20" rx="2" fill="#374151" /> <rect x="127" y="107" width="14" height="8" fill="#10B981" /> <circle cx="129" cy="118" r="1" fill="#fff" /> <circle cx="133" cy="118" r="1" fill="#fff" /> <circle cx="137" cy="118" r="1" fill="#fff" /> <circle cx="141" cy="118" r="1" fill="#fff" /> <rect x="90" y="135" width="8" height="25" rx="4" fill="#1F2937" /> <rect x="102" y="135" width="8" height="25" rx="4" fill="#1F2937" /> <ellipse cx="94" cy="165" rx="8" ry="4" fill="#000" /> <ellipse cx="106" cy="165" rx="8" ry="4" fill="#000" /> <text x="45" y="55" font-size="18" fill="var(--secondary-color)">
-           📊
-          </text> <text x="150" y="65" font-size="16" fill="var(--secondary-color)">
-           🔍
-          </text> <text x="35" y="145" font-size="20" fill="var(--secondary-color)">
-           💼
-          </text>
-         </svg>
-         <h3 class="text-2xl font-bold mb-2 primary-text">Investisseur</h3>
-         <p class="text-sm secondary-text">Cliquez pour retourner</p>
-        </div>
-        <div class="flip-card-back card-surface p-6 flex flex-col justify-center">
-         <div class="text-left space-y-4">
-          <p class="font-semibold primary-text">Objectif :</p>
-          <p class="text-sm main-text">Investir intelligemment pour faire fructifier votre argent.</p>
-          <p class="font-semibold primary-text">Mission :</p>
-          <p class="text-sm main-text">Analyser les bilans et comptes de résultats des entreprises pour repérer les plus prometteuses. Attention : certaines entreprises sont très rentables et feront gagner beaucoup d'argent, d'autres sont risquées et peuvent faire perdre de l'argent !</p>
-         </div>
-        </div>
-       </div>
+html, body { height: 100%; }
+:root { --nav-h: 64px; }
+
+main{
+  height: 100vh;
+  padding-top: var(--nav-h);
+}
+
+/* Chaque slide = la hauteur de l’écran (sans le menu) */
+.slide{
+  display: none;
+  height: calc(100vh - var(--nav-h));
+  min-height: calc(100vh - var(--nav-h));
+  overflow: hidden;
+}
+.slide.active{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Slides qui doivent scroller */
+.slide.scroll{
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  justify-content: flex-start;
+}
+
+/* ===== Univers bleu STRATE-JEUX ===== */
+.sj-hero{
+  position: relative;
+  isolation: isolate;
+  color: #fff;
+  background: linear-gradient(135deg, #061A5C 0%, #0E55E6 45%, #204ECF 70%, #3FA9FF 100%);
+  background-size: 300% 300%;
+  animation: sjGradient 14s ease infinite;
+}
+@keyframes sjGradient{
+  0%,100%{ background-position: 0% 50%; }
+  50%{ background-position: 100% 50%; }
+}
+
+/* halos lumineux en mouvement */
+.sj-blob{
+  position: absolute; z-index: -1;
+  border-radius: 9999px;
+  filter: blur(60px);
+  opacity: .55;
+  animation: sjFloat 12s ease-in-out infinite;
+  pointer-events: none;
+}
+.sj-blob.b1{ width: 42vw; height: 42vw; background: #3FA9FF; top: -12vw; left: -10vw; }
+.sj-blob.b2{ width: 36vw; height: 36vw; background: #061A5C; bottom: -14vw; right: -8vw; animation-delay: -4s; }
+.sj-blob.b3{ width: 22vw; height: 22vw; background: #FFC94D; top: 40%; right: 18%; animation-delay: -8s; opacity: .22; }
+@keyframes sjFloat{
+  0%,100%{ transform: translate(0,0) scale(1); }
+  33%{ transform: translate(4vw,3vw) scale(1.08); }
+  66%{ transform: translate(-3vw,2vw) scale(.95); }
+}
+
+/* grille discrète */
+.sj-grid{
+  position: absolute; inset: 0; z-index: -1;
+  background-image:
+    linear-gradient(rgba(255,255,255,.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.07) 1px, transparent 1px);
+  background-size: 48px 48px;
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+          mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+  pointer-events: none;
+}
+
+/* logos d'entreprises et symboles qui flottent autour du titre */
+.sj-floaters{ position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.sj-floater{
+  position: absolute;
+  width: clamp(48px, 6.5vw, 84px); height: clamp(48px, 6.5vw, 84px);
+  border-radius: 20px;
+  padding: 6px;
+  overflow: hidden;
+  background: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: clamp(1.4rem, 3vw, 2.2rem);
+  box-shadow: 0 0 0 3px rgba(255,255,255,.9), 0 12px 30px rgba(6,26,92,.45);
+  animation: sjBob 6s ease-in-out infinite, sjPop .7s cubic-bezier(.34,1.56,.64,1) both;
+}
+.sj-floater.coin{ border-radius: 9999px; background: #FFC94D; }
+.sj-floater img{ width: 100%; height: 100%; object-fit: contain; display: block; }
+@keyframes sjBob{
+  0%,100%{ transform: translateY(0) rotate(-3deg); }
+  50%{ transform: translateY(-14px) rotate(3deg); }
+}
+@keyframes sjPop{
+  from{ opacity: 0; scale: .3; }
+  to{ opacity: 1; scale: 1; }
+}
+
+.sj-badge{
+  display: inline-flex; align-items: center; gap: .5rem;
+  padding: .45rem 1rem;
+  border-radius: 9999px;
+  background: rgba(255,255,255,.14);
+  border: 1px solid rgba(255,255,255,.3);
+  backdrop-filter: blur(8px);
+  font-weight: 700; letter-spacing: .12em; text-transform: uppercase; font-size: .8rem;
+}
+.sj-dot{
+  width: 8px; height: 8px; border-radius: 9999px; background: #5CFFB0;
+  box-shadow: 0 0 0 0 rgba(92,255,176,.7);
+  animation: sjPing 1.6s infinite;
+}
+@keyframes sjPing{
+  0%{ box-shadow: 0 0 0 0 rgba(92,255,176,.7); }
+  100%{ box-shadow: 0 0 0 12px rgba(92,255,176,0); }
+}
+
+.sj-title{
+  font-weight: 900;
+  line-height: .95;
+  letter-spacing: -.02em;
+  font-size: clamp(2.8rem, 9vw, 7rem);
+  text-shadow: 0 10px 40px rgba(6,26,92,.45);
+}
+.sj-title .shine{
+  background: linear-gradient(90deg, #fff 0%, #FFD976 25%, #fff 50%, #FFD976 75%, #fff 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+  animation: sjShine 4s linear infinite;
+}
+@keyframes sjShine{ to{ background-position: 200% center; } }
+
+.sj-cta{
+  display: inline-flex; align-items: center; gap: .6rem;
+  padding: 1rem 2.2rem;
+  border-radius: 9999px;
+  background: #fff; color: #0E55E6;
+  font-weight: 900; font-size: 1.2rem;
+  box-shadow: 0 14px 40px rgba(6,26,92,.45);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.sj-cta:hover{ transform: translateY(-3px) scale(1.04); box-shadow: 0 20px 50px rgba(6,26,92,.55); }
+.sj-cta .arrow{ transition: transform .2s ease; }
+.sj-cta:hover .arrow{ transform: translateX(5px); }
+
+/* entrées en cascade (rejouées à chaque affichage de la slide) */
+.sj-in{ animation: sjRise .8s cubic-bezier(.2,.8,.2,1) both; }
+.sj-d1{ animation-delay: .1s; } .sj-d2{ animation-delay: .25s; }
+.sj-d3{ animation-delay: .4s; } .sj-d4{ animation-delay: .55s; }
+.sj-d5{ animation-delay: .7s; }
+@keyframes sjRise{
+  from{ opacity: 0; transform: translateY(30px); }
+  to{ opacity: 1; transform: translateY(0); }
+}
+
+/* Cartes "verre" */
+.sj-role{
+  position: relative;
+  border-radius: 28px;
+  padding: clamp(20px, 3vw, 34px);
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.28);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 20px 60px rgba(6,26,92,.35);
+  transition: transform .3s ease, background .3s ease;
+  overflow: hidden;
+}
+.sj-role:hover{ transform: translateY(-6px) rotate(-.4deg); background: rgba(255,255,255,.18); }
+.sj-role::before{
+  content: ""; position: absolute; inset: 0 0 auto 0; height: 5px;
+  background: var(--role-accent);
+}
+.sj-role-pic{
+  width: 104px; height: 104px; border-radius: 28px;
+  display: flex; align-items: center; justify-content: center;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 0 0 4px var(--role-accent), 0 12px 30px rgba(6,26,92,.4);
+  margin: 0 auto 14px;
+  font-size: 3rem;
+}
+.sj-role-pic img{ width: 100%; height: 100%; object-fit: cover; display: block; }
+.sj-mission{
+  background: rgba(255,255,255,.95); color: #0B2A7A;
+  border-radius: 16px; padding: 12px 16px;
+  font-weight: 700;
+}
+.sj-point{
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.08);
+  transition: background .2s ease, transform .2s ease;
+}
+.sj-point:hover{ background: rgba(255,255,255,.16); transform: translateX(4px); }
+.sj-point .emo{
+  font-size: 1.4rem; width: 42px; height: 42px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 12px; background: rgba(255,255,255,.15);
+}
+
+.sj-vs{
+  width: 76px; height: 76px; border-radius: 9999px;
+  display: flex; align-items: center; justify-content: center;
+  background: #fff; color: #0E55E6;
+  font-weight: 900; font-size: 1.6rem;
+  box-shadow: 0 0 0 8px rgba(255,255,255,.18), 0 14px 40px rgba(6,26,92,.5);
+  animation: pulse 2s infinite;
+}
+.pulse-animation { animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+
+/* ===== Navigation ===== */
+.sj-nav{
+  background: rgba(6,26,92,.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,.12);
+  box-shadow: 0 8px 30px rgba(6,26,92,.35);
+  height: var(--nav-h);
+}
+.sj-progress{
+  position: absolute; left: 0; bottom: 0; height: 3px;
+  background: linear-gradient(90deg, #5CFFB0, #FFC94D);
+  transition: width .4s ease;
+}
+.sj-btn{
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  padding: .7rem 1.6rem;
+  border-radius: 9999px;
+  font-weight: 800;
+  transition: transform .2s ease, box-shadow .2s ease, background .2s ease, opacity .2s ease;
+}
+.sj-btn:hover{ transform: translateY(-2px); }
+.sj-btn:disabled{ opacity: .4; cursor: not-allowed; transform: none; }
+.sj-btn-sm{ padding: .5rem 1.1rem; font-size: .9rem; }
+.sj-btn-white{ background: #fff; color: #0E55E6; box-shadow: 0 10px 28px rgba(6,26,92,.35); }
+.sj-btn-white:hover{ box-shadow: 0 14px 36px rgba(6,26,92,.45); }
+.sj-btn-blue{ background: #0E55E6; color: #fff; box-shadow: 0 10px 28px rgba(14,85,230,.35); }
+.sj-btn-blue:hover{ background: #204ECF; }
+.sj-btn-ghost{ background: rgba(255,255,255,.12); color: #fff; border: 1px solid rgba(255,255,255,.3); }
+.sj-btn-ghost:hover{ background: rgba(255,255,255,.2); }
+.sj-btn-amber{ background: #FFB020; color: #061A5C; }
+.sj-btn-soft{ background: #E8EEFC; color: #0B2A7A; }
+.sj-btn-soft:hover{ background: #D6E1FB; }
+
+.sj-dots{ gap: 6px; align-items: center; }
+.sj-dots button{
+  width: 8px; height: 8px; border-radius: 9999px;
+  background: rgba(255,255,255,.3);
+  transition: width .3s ease, background .3s ease;
+}
+.sj-dots button.on{ width: 24px; background: #fff; }
+.sj-dots button:hover{ background: rgba(255,255,255,.7); }
+
+.sj-panel{
+  border-radius: 28px;
+  padding: clamp(16px, 2.5vw, 28px);
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.28);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 20px 60px rgba(6,26,92,.35);
+}
+.sj-h2{
+  font-weight: 900;
+  font-size: clamp(2rem, 4.5vw, 3rem);
+  line-height: 1.1;
+  text-shadow: 0 8px 30px rgba(6,26,92,.4);
+}
+.sj-step-num{
+  width: 48px; height: 48px; border-radius: 9999px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #fff; color: #0E55E6; font-weight: 900; font-size: 1.2rem;
+  box-shadow: 0 8px 24px rgba(6,26,92,.35);
+  flex: none;
+}
+
+/* ===== Timers ===== */
+.timer-shell{
+  background: rgba(255,255,255,0.94);
+  border: 1px solid rgba(255,255,255,.6);
+  box-shadow: 0 30px 80px rgba(6,26,92,.5);
+  border-radius: 32px;
+  padding: 28px 24px;
+  width: min(560px, 92vw);
+  margin: 0 auto;
+  color: #061A5C;
+}
+.timer-circle {
+  width: clamp(180px, 30vw, 250px);
+  height: clamp(180px, 30vw, 250px);
+  border-radius: 9999px;
+  position: relative;
+  background: conic-gradient(from 0deg, #10b981 0deg, #e5e7eb 0deg);
+  transition: background 0.12s ease;
+  box-shadow: inset 0 0 0 12px rgba(255,255,255,0.88), 0 12px 28px rgba(0,0,0,0.12);
+  border: 1px solid rgba(0,0,0,0.06);
+}
+.timer-circle::after{
+  content: ""; position: absolute; inset: 22px; border-radius: 9999px; background: #fff;
+}
+.timer-text {
+  position: absolute; top: 50%; left: 50%; z-index: 1;
+  transform: translate(-50%, -50%);
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 900;
+  color: #061A5C;
+  letter-spacing: 0.5px;
+  font-variant-numeric: tabular-nums;
+}
+.timer-circle.done{ animation: pulse 1s infinite; }
+
+/* ===== Révélation ===== */
+.sj-counter{
+  font-weight: 900;
+  font-size: clamp(5rem, 16vw, 11rem);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 14px 50px rgba(6,26,92,.5);
+}
+.sj-years{ display: flex; gap: 10px; justify-content: center; }
+.sj-years span{
+  width: clamp(48px, 9vw, 90px); height: 8px; border-radius: 9999px;
+  background: rgba(255,255,255,.2); overflow: hidden; position: relative;
+}
+.sj-years span::after{
+  content: ""; position: absolute; inset: 0; background: #FFC94D;
+  transform: scaleX(0); transform-origin: left;
+  transition: transform .9s ease;
+}
+.sj-years span.on::after{ transform: scaleX(1); }
+
+/* ===== Saisie des investissements ===== */
+.inv-card{
+  background: #fff; color: #111827;
+  border-radius: 20px;
+  padding: 16px 18px;
+  box-shadow: 0 10px 30px rgba(6,26,92,.18);
+  border-left: 6px solid var(--accent, #0E55E6);
+}
+.inv-num{
+  width: 40px; height: 40px; border-radius: 12px; flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #0E55E6; color: #fff; font-weight: 900;
+}
+.inv-total{
+  font-weight: 900; color: #0E55E6;
+  background: #E8EEFC; border-radius: 9999px;
+  padding: .3rem .9rem; font-size: .95rem; white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.inv-field{
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 6px 4px; border-radius: 12px;
+  transition: background .2s ease;
+}
+.inv-field:focus-within{ background: #EEF3FE; }
+.inv-field .co-mini{
+  width: 34px; height: 34px; border-radius: 10px; object-fit: contain; background: #fff;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.08);
+}
+.inv-field .co-name{
+  font-size: .62rem; font-weight: 700; color: #4B5563;
+  text-align: center; line-height: 1.1; min-height: 1.4em;
+}
+.investment-input{
+  width: 100%; max-width: 86px;
+  text-align: center;
+  border: 2px solid #E5E7EB;
+  border-radius: 10px;
+  padding: 6px 4px;
+  font-family: 'Poppins', sans-serif; font-weight: 700; color: #061A5C;
+  transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+  -moz-appearance: textfield;
+}
+.investment-input::-webkit-outer-spin-button,
+.investment-input::-webkit-inner-spin-button{ -webkit-appearance: none; margin: 0; }
+.investment-input:focus{ outline: none; border-color: #0E55E6; box-shadow: 0 0 0 4px rgba(14,85,230,.15); }
+@media (max-width: 480px){
+  .investment-input{ font-size: .8rem; padding: 6px 2px; }
+}
+.investment-input.filled{ border-color: #10B981; background: #ECFDF5; }
+
+/* ===== Cartes entreprises (révélation) ===== */
+#companies-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 18px;
+}
+.co-card{
+  perspective: 1200px;
+  width: 100%;
+  max-width: 260px;
+  margin: 0 auto;
+  aspect-ratio: 4 / 5;
+  cursor: pointer;
+}
+.co-inner{
+  position: relative; width: 100%; height: 100%;
+  transition: transform .8s cubic-bezier(.3,1.4,.5,1);
+  transform-style: preserve-3d;
+}
+.co-card.revealed .co-inner{ transform: rotateY(180deg); }
+.co-card:not(.revealed):hover .co-inner{ transform: translateY(-6px) rotateY(-8deg); }
+.co-face{
+  position: absolute; inset: 0;
+  -webkit-backface-visibility: hidden; backface-visibility: hidden;
+  border-radius: 22px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 16px; text-align: center;
+}
+.co-back{
+  background: rgba(255,255,255,.14);
+  border: 1px solid rgba(255,255,255,.3);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 14px 50px rgba(6,26,92,.3);
+  color: #fff;
+}
+.co-logo{
+  width: 62%; aspect-ratio: 1; border-radius: 22px;
+  background: #fff; padding: 8px; object-fit: contain;
+  box-shadow: 0 0 0 4px rgba(255,255,255,.35), 0 12px 30px rgba(6,26,92,.4);
+  margin-bottom: 12px;
+}
+.co-logo-fallback{
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.6rem; font-weight: 900; color: #0E55E6;
+}
+.co-front{
+  transform: rotateY(180deg);
+  background: #fff; color: #111827;
+  box-shadow: 0 14px 50px rgba(6,26,92,.3);
+  border-top: 8px solid var(--res);
+}
+.co-perf{
+  font-size: clamp(2.2rem, 4vw, 3rem); font-weight: 900; line-height: 1;
+  color: var(--res);
+  font-variant-numeric: tabular-nums;
+}
+.co-tag{
+  display: inline-block; padding: .25rem .8rem; border-radius: 9999px;
+  font-weight: 800; font-size: .8rem;
+  background: var(--res-soft); color: var(--res);
+}
+
+/* ===== Récap & classement ===== */
+.row-white{
+  background: #fff; color: #111827;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(6,26,92,.16);
+  padding: 12px 16px;
+}
+.rank-pill{
+  width: 38px; height: 38px; border-radius: 9999px; flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #E8EEFC; color: #0E55E6; font-weight: 900;
+}
+.bar-track{ height: 10px; border-radius: 9999px; background: #E8EEFC; overflow: hidden; }
+.bar-fill{
+  height: 100%; width: 0; border-radius: 9999px;
+  background: linear-gradient(90deg, #0E55E6, #3FA9FF);
+  transition: width 1s cubic-bezier(.2,.8,.2,1);
+}
+
+.podium{
+  display: flex; justify-content: center; align-items: flex-end;
+  gap: clamp(10px, 2vw, 22px);
+  min-height: 300px;
+}
+.podium-col{ display: flex; flex-direction: column; align-items: center; width: clamp(100px, 18vw, 170px); }
+.podium-avatar{
+  width: 64px; height: 64px; border-radius: 9999px;
+  display: flex; align-items: center; justify-content: center;
+  background: #fff; color: #0E55E6; font-weight: 900; font-size: 2rem;
+  box-shadow: 0 0 0 4px var(--medal), 0 12px 30px rgba(6,26,92,.4);
+  margin-bottom: 8px;
+  animation: sjPop .6s cubic-bezier(.34,1.56,.64,1) both;
+  animation-delay: var(--delay);
+}
+.podium-step{
+  width: 100%;
+  border-radius: 20px 20px 0 0;
+  background: linear-gradient(180deg, var(--medal), var(--medal-dark));
+  box-shadow: 0 20px 50px rgba(6,26,92,.4);
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+  padding-top: 14px;
+  color: #061A5C;
+  transform-origin: bottom;
+  animation: podiumRise .9s cubic-bezier(.2,.8,.2,1) both;
+  animation-delay: var(--delay);
+}
+@keyframes podiumRise{ from{ transform: scaleY(0); } to{ transform: scaleY(1); } }
+
+/* ===== Modal ===== */
+.modal{
+  display: none;
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(6,26,92,.6);
+  backdrop-filter: blur(6px);
+  padding: 16px;
+}
+.modal.show{ display: flex; align-items: center; justify-content: center; }
+.modal-box{
+  background: #fff; color: #111827;
+  border-radius: 28px;
+  padding: clamp(18px, 3vw, 30px);
+  width: min(760px, 100%);
+  max-height: 92vh; overflow: auto;
+  box-shadow: 0 40px 100px rgba(6,26,92,.6);
+  animation: sjRise .4s cubic-bezier(.2,.8,.2,1) both;
+}
+
+/* ===== Confettis ===== */
+.confetti{
+  position: fixed; top: -20px; z-index: 3000;
+  width: 10px; height: 16px; border-radius: 3px;
+  pointer-events: none;
+  animation: confettiFall linear forwards;
+}
+@keyframes confettiFall{
+  to{ transform: translate(var(--dx), 110vh) rotate(var(--rot)); opacity: .9; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .sj-hero, .sj-blob, .sj-floater, .sj-title .shine, .sj-in, .sj-vs, .sj-dot,
+  .pulse-animation, .podium-step, .podium-avatar, .timer-circle.done{ animation: none !important; }
+  .co-inner, .bar-fill{ transition: none !important; }
+}
+
+  </style>
+</head>
+
+<body class="h-full bg-gray-50">
+<main>
+
+  <!-- Navigation -->
+  <nav class="sj-nav fixed top-0 left-0 right-0 z-50 px-4 md:px-6 flex items-center">
+    <div class="flex justify-between items-center w-full gap-4">
+      <div class="flex space-x-2">
+        <button id="prevBtn" onclick="changeSlide(-1)" class="sj-btn sj-btn-sm sj-btn-ghost">
+          ← <span class="hidden sm:inline">Précédent</span>
+        </button>
+        <button id="nextBtn" onclick="changeSlide(1)" class="sj-btn sj-btn-sm sj-btn-white">
+          <span class="hidden sm:inline">Suivant</span> →
+        </button>
       </div>
-     </div>
-    </div>
-   </div><!-- Diapositive 2: Déroulement du jeu -->
-   <div id="slide2" class="slide">
-    <header class="text-center py-8">
-     <h1 id="game-flow-title" class="text-5xl font-bold mb-8">Déroulement du jeu</h1>
-    </header>
-    <div class="flex-1 flex items-center justify-center px-8">
-     <div class="max-w-4xl"><!-- Contenu centré -->
-      <div class="card-surface rounded-2xl shadow-lg p-12">
-       <div class="space-y-6 text-lg main-text">
-        <p>• Chaque entrepreneur s'installe face à un investisseur.</p>
-        <p>• Vous avez un temps limité pour convaincre (entrepreneurs) ou analyser (investisseurs).</p>
-        <p>• À la fin du temps, les investisseurs décident d'investir ou non.</p>
-        <p>• Les entrepreneurs changent de table et rencontrent un nouvel investisseur.</p>
-        <div class="my-8 p-4 rounded-lg success-bg">
-         <p class="font-bold text-xl primary-text">→ Durée des tours : 1er tour : 10 min / 2e tour : 8 min / 3e tour et suivants : 7 min</p>
-        </div>
-        <p class="text-center font-medium">À la fin, nous révélons la vraie performance des entreprises : certains investissements seront gagnants, d'autres… des risques mal récompensés.</p>
-       </div>
+      <div id="slideDots" class="sj-dots hidden md:flex" aria-label="Aller à la slide"></div>
+      <div class="text-sm font-semibold text-white/80 whitespace-nowrap">
+        Slide <span id="currentSlideNumber">1</span> / <span id="totalSlides">11</span>
       </div>
-     </div>
     </div>
-   </div><!-- Diapositive 3: Compte à rebours 10 min -->
-   <div id="slide3" class="slide">
-    <header class="text-center py-8">
-     <h1 class="text-4xl font-bold mb-2 primary-text">C'est parti ! — Tour 1 — 10 minutes</h1>
-    </header>
-    <div class="flex-1 flex flex-col items-center justify-center">
-     <div class="relative mb-8">
-      <svg class="timer-circle" width="300" height="300"><circle cx="150" cy="150" r="140" stroke="#e5e7eb" stroke-width="8" fill="none" /> <circle id="timer-progress-3" cx="150" cy="150" r="140" stroke="var(--primary-color)" stroke-width="8" fill="none" stroke-dasharray="879.6" stroke-dashoffset="0" stroke-linecap="round" />
-      </svg>
-      <div class="absolute inset-0 flex items-center justify-center"><span id="timer-display-3" class="text-6xl font-bold primary-text">10:00</span>
-      </div>
-     </div>
-     <div class="flex gap-4"><button onclick="startTimer(3, 600)" class="nav-btn text-white primary-bg">Démarrer</button> <button onclick="pauseTimer(3)" class="nav-btn text-white secondary-bg">Pause</button> <button onclick="resetTimer(3, 600)" class="nav-btn text-white" style="background-color: #B91C1C;">Réinitialiser</button>
-     </div>
-    </div>
-   </div><!-- Diapositive 4: Compte à rebours 8 min -->
-   <div id="slide4" class="slide">
-    <header class="text-center py-8">
-     <h1 class="text-4xl font-bold mb-2 primary-text">C'est parti ! — Tour 2 — 8 minutes</h1>
-    </header>
-    <div class="flex-1 flex flex-col items-center justify-center">
-     <div class="relative mb-8">
-      <svg class="timer-circle" width="300" height="300"><circle cx="150" cy="150" r="140" stroke="#e5e7eb" stroke-width="8" fill="none" /> <circle id="timer-progress-4" cx="150" cy="150" r="140" stroke="var(--primary-color)" stroke-width="8" fill="none" stroke-dasharray="879.6" stroke-dashoffset="0" stroke-linecap="round" />
-      </svg>
-      <div class="absolute inset-0 flex items-center justify-center"><span id="timer-display-4" class="text-6xl font-bold primary-text">08:00</span>
-      </div>
-     </div>
-     <div class="flex gap-4"><button onclick="startTimer(4, 480)" class="nav-btn text-white primary-bg">Démarrer</button> <button onclick="pauseTimer(4)" class="nav-btn text-white secondary-bg">Pause</button> <button onclick="resetTimer(4, 480)" class="nav-btn text-white" style="background-color: #B91C1C;">Réinitialiser</button>
-     </div>
-    </div>
-   </div><!-- Diapositive 5: Compte à rebours 7 min -->
-   <div id="slide5" class="slide">
-    <header class="text-center py-8">
-     <h1 class="text-4xl font-bold mb-2 primary-text">C'est parti ! — Tour 3+ — 7 minutes</h1>
-    </header>
-    <div class="flex-1 flex flex-col items-center justify-center">
-     <div class="relative mb-8">
-      <svg class="timer-circle" width="300" height="300"><circle cx="150" cy="150" r="140" stroke="#e5e7eb" stroke-width="8" fill="none" /> <circle id="timer-progress-5" cx="150" cy="150" r="140" stroke="var(--primary-color)" stroke-width="8" fill="none" stroke-dasharray="879.6" stroke-dashoffset="0" stroke-linecap="round" />
-      </svg>
-      <div class="absolute inset-0 flex items-center justify-center"><span id="timer-display-5" class="text-6xl font-bold primary-text">07:00</span>
-      </div>
-     </div>
-     <div class="flex gap-4"><button onclick="startTimer(5, 420)" class="nav-btn text-white primary-bg">Démarrer</button> <button onclick="pauseTimer(5)" class="nav-btn text-white secondary-bg">Pause</button> <button onclick="resetTimer(5, 420)" class="nav-btn text-white" style="background-color: #B91C1C;">Réinitialiser</button>
-     </div>
-    </div>
-   </div><!-- Diapositive 6: Révélation -->
-   <div id="slide6" class="slide">
-    <header class="text-center py-8">
-     <h1 id="revelation-title" class="text-5xl font-bold mb-8">Révélation des résultats</h1>
-    </header>
-    <div class="flex-1 flex items-center justify-center px-8">
-     <div class="max-w-4xl"><!-- Contenu centré -->
-      <div class="card-surface rounded-2xl shadow-lg p-12 text-center">
-       <p id="revelation-text" class="text-2xl font-medium main-text">3 années se sont écoulées… Voyons qui a réussi à faire fructifier son capital !</p>
-      </div>
-     </div>
-    </div>
-   </div><!-- Diapositive 7: Saisie des investissements -->
-   <div id="slide7" class="slide">
-    <header class="text-center py-6">
-     <h1 class="text-4xl font-bold mb-2 primary-text">Saisie des investissements</h1>
-    </header>
-    <div class="flex-1 px-6 pb-20 overflow-y-auto">
-     <div class="grid grid-cols-2 gap-6 max-w-7xl mx-auto">
-      <div id="investors-1-5" class="space-y-4"></div>
-      <div id="investors-6-10" class="space-y-4"></div>
-     </div>
-    </div>
-   </div><!-- Diapositive 8: Flip cards entreprises -->
-   <div id="slide8" class="slide">
-    <header class="text-center py-6">
-     <h1 class="text-4xl font-bold mb-2 primary-text">Performances des entreprises</h1>
-    </header>
-    <div class="flex-1 px-6 pb-20 overflow-y-auto">
-     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 max-w-7xl mx-auto" id="companies-grid"><!-- Les cartes d'entreprises seront générées ici -->
-     </div>
-    </div>
-   </div><!-- Diapositive 9: Récapitulatif des collectes -->
-   <div id="slide9" class="slide">
-    <header class="text-center py-6">
-     <h1 class="text-4xl font-bold mb-2 primary-text">Récapitulatif des collectes</h1>
-     <p class="text-lg main-text">Total des investissements reçus par entreprise</p>
-    </header>
-    <div class="flex-1 px-6 pb-20">
-     <div class="max-w-6xl mx-auto">
-      <div class="grid grid-cols-2 gap-6">
-       <div id="summary-companies-1-5" class="space-y-4"></div>
-       <div id="summary-companies-6-10" class="space-y-4"></div>
-      </div>
-     </div>
-    </div>
-   </div><!-- Diapositive 10: Résultats finaux -->
-   <div id="slide10" class="slide">
-    <header class="text-center py-6">
-     <h1 class="text-4xl font-bold mb-2 primary-text">Résultats finaux</h1>
-     <p class="text-lg main-text">Classement des investisseurs</p>
-    </header>
-    <div class="flex-1 px-6 pb-20">
-     <div class="max-w-4xl mx-auto">
-      <div id="podium" class="mb-8 flex justify-center items-end space-x-4"></div>
-      <div class="card-surface rounded-2xl shadow-lg overflow-hidden">
-       <div class="text-white p-4 primary-bg">
-        <h2 class="text-2xl font-bold text-center">Classement complet</h2>
-       </div>
-       <div id="results-list" class="divide-y divide-gray-200"></div>
-      </div>
-     </div>
-    </div>
-   </div>
-  </main><!-- Modal pour les images d'entreprises -->
-  <div id="company-modal" class="modal">
-   <div class="card-surface rounded-2xl p-8 max-w-2xl mx-4">
-    <div class="flex justify-between items-center mb-4">
-     <h3 id="modal-company-name" class="text-2xl font-bold primary-text"></h3><button onclick="closeModal()" class="secondary-text hover:text-gray-700 text-3xl">×</button>
-    </div><img id="modal-company-image" src="" alt="" class="w-full h-80 object-contain rounded-lg bg-gray-50">
-   </div>
-  </div><!-- Navigation -->
-  <nav class="navigation"><button id="prevBtn" class="nav-btn bg-gray-500 text-white" onclick="changeSlide(-1)">← Précédent</button> <span id="slideIndicator" class="nav-btn text-white primary-bg">1 / 10</span> <button id="nextBtn" class="nav-btn text-white primary-bg" onclick="changeSlide(1)">Suivant →</button>
+    <div id="progressBar" class="sj-progress" style="width:0"></div>
   </nav>
-  <script>
-        // Configuration par défaut
-        const defaultConfig = {
-            main_title: "Business Bluff",
-            subtitle_roles: "Les rôles",
-            game_flow_title: "Déroulement du jeu",
-            revelation_title: "Révélation des résultats",
-            revelation_text: "3 années se sont écoulées… Voyons qui a réussi à faire fructifier son capital !",
-            background_color: "#95B8E9",
-            surface_color: "#ffffff",
-            text_color: "#1F2937",
-            primary_color: "#2951C5",
-            secondary_color: "#6b7280"
-        };
 
-        // Données des entreprises avec vos vraies images
-        const companies = [
-            { 
-                name: "ÉCOHABITAT", 
-                performance: 0.5, 
-                logo: "https://lh3.googleusercontent.com/d/1tjD6blPeQSNqJttbwSgFQ9_sU58cX1kC",
-                popupImage: "https://lh3.googleusercontent.com/d/1vxBHKVli9-e4r9w6Q8o5Fdk3UkG2oE_S"
-            },
-            { 
-                name: "CAFÉ 360°", 
-                performance: -0.8, 
-                logo: "https://lh3.googleusercontent.com/d/12uPUTVPcexP6QFPuaIeathMsrDrDNVWb",
-                popupImage: "https://lh3.googleusercontent.com/d/1aZhie1GW951Y-6tjWBZ2Pu5hjukN3Grg"
-            },
-            { 
-                name: "PET ASSISTANT", 
-                performance: -0.8, 
-                logo: "https://lh3.googleusercontent.com/d/1-FAD01VueecY3ZafkA7wlWjiDrjVhnlk",
-                popupImage: "https://lh3.googleusercontent.com/d/1cTqRyq65OjanvoDT9C_1TmjD9gaasTPQ"
-            },
-            { 
-                name: "HEALTH CUBE", 
-                performance: 0.25, 
-                logo: "https://lh3.googleusercontent.com/d/15BAPIyu_e56vBw5xkr2hSPS02fhATYhm",
-                popupImage: "https://lh3.googleusercontent.com/d/1sAOO__8tVno555WwnMFsPxppgGuCxt9P"
-            },
-            { 
-                name: "BENTO EXPRESS", 
-                performance: 0.25, 
-                logo: "https://lh3.googleusercontent.com/d/11e05O7zJaUDwd8Kf3ZR_CSbz6hxg8611",
-                popupImage: "https://lh3.googleusercontent.com/d/17870I4zp01DsSDAqAz7kDVacXnTwfUd3"
-            },
-            { 
-                name: "GREEN PRINT", 
-                performance: -0.5, 
-                logo: "https://lh3.googleusercontent.com/d/1qDLT40pJ7x2JhT5pODm0REf-9F_C2Tc6",
-                popupImage: "https://lh3.googleusercontent.com/d/1yHtaGofnRmWp3ySHreUjZSRbFliL2jpG"
-            },
-            { 
-                name: "COSY PLACE", 
-                performance: -0.5, 
-                logo: "https://lh3.googleusercontent.com/d/1hcSlZFxDUFR-owWdYd4BE_WCBxQC61kT",
-                popupImage: "https://lh3.googleusercontent.com/d/1M08XIeURG_j-onMqDdW2c7k93EEL1kvQ"
-            },
-            { 
-                name: "ARGILIGHT", 
-                performance: 0.5, 
-                logo: "https://lh3.googleusercontent.com/d/14up3r1-xsZUxKeYjcwgy-NatKTOeI3_v",
-                popupImage: "https://lh3.googleusercontent.com/d/1OVQGHn2E_f5G0ayoSrrH7vF7PrPAq2vz"
-            },
-            { 
-                name: "FLASH FOODIES", 
-                performance: -0.5, 
-                logo: "https://lh3.googleusercontent.com/d/1gEw2Wm6QKq33hyTyJWxBrozpijmy148N",
-                popupImage: "https://lh3.googleusercontent.com/d/1_-zC878jd7CpQkQQIexG-UkhI-R6J05x"
-            },
-            { 
-                name: "VERTIFERME", 
-                performance: 0.5, 
-                logo: "https://lh3.googleusercontent.com/d/1xmjWsq10YjkXgR_ANZoHbnN5Hr-MV-Kf",
-                popupImage: "https://lh3.googleusercontent.com/d/1XTA-3wXHsaNJkOlLRe_8M3iG7Av5j9tF"
-            }
-        ];
+  <!-- Slide 1 : Titre -->
+  <div class="slide active sj-hero items-center justify-center text-center">
+    <div class="sj-grid"></div>
+    <div class="sj-blob b1"></div>
+    <div class="sj-blob b2"></div>
+    <div class="sj-blob b3"></div>
 
-        // État de l'application
-        let currentSlide = 1;
-        let investments = {};
-        let timers = {};
-        let flipTimeouts = {};
+    <!-- logos d'entreprises qui flottent autour du titre -->
+    <div class="sj-floaters" id="heroFloaters" aria-hidden="true"></div>
 
-        // Initialisation du SDK
-        async function initSDK() {
-            if (window.elementSdk) {
-                await window.elementSdk.init({
-                    defaultConfig,
-                    onConfigChange: async (config) => {
-                        // Mise à jour du contenu textuel
-                        document.getElementById('main-title').textContent = config.main_title || defaultConfig.main_title;
-                        document.getElementById('subtitle-roles').textContent = config.subtitle_roles || defaultConfig.subtitle_roles;
-                        document.getElementById('game-flow-title').textContent = config.game_flow_title || defaultConfig.game_flow_title;
-                        document.getElementById('revelation-title').textContent = config.revelation_title || defaultConfig.revelation_title;
-                        document.getElementById('revelation-text').textContent = config.revelation_text || defaultConfig.revelation_text;
-                        
-                        // Mise à jour des couleurs via CSS custom properties
-                        const root = document.documentElement;
-                        root.style.setProperty('--background-color', config.background_color || defaultConfig.background_color);
-                        root.style.setProperty('--surface-color', config.surface_color || defaultConfig.surface_color);
-                        root.style.setProperty('--text-color', config.text_color || defaultConfig.text_color);
-                        root.style.setProperty('--primary-color', config.primary_color || defaultConfig.primary_color);
-                        root.style.setProperty('--secondary-color', config.secondary_color || defaultConfig.secondary_color);
-                        
-                        // Application des couleurs aux éléments
-                        document.getElementById('main-body').style.backgroundColor = config.background_color || defaultConfig.background_color;
-                        
-                        // Mise à jour des classes de couleur
-                        updateColorClasses(config);
-                    },
-                    mapToCapabilities: (config) => ({
-                        recolorables: [
-                            {
-                                get: () => config.background_color || defaultConfig.background_color,
-                                set: (value) => {
-                                    config.background_color = value;
-                                    window.elementSdk.setConfig({ background_color: value });
-                                }
-                            },
-                            {
-                                get: () => config.surface_color || defaultConfig.surface_color,
-                                set: (value) => {
-                                    config.surface_color = value;
-                                    window.elementSdk.setConfig({ surface_color: value });
-                                }
-                            },
-                            {
-                                get: () => config.text_color || defaultConfig.text_color,
-                                set: (value) => {
-                                    config.text_color = value;
-                                    window.elementSdk.setConfig({ text_color: value });
-                                }
-                            },
-                            {
-                                get: () => config.primary_color || defaultConfig.primary_color,
-                                set: (value) => {
-                                    config.primary_color = value;
-                                    window.elementSdk.setConfig({ primary_color: value });
-                                }
-                            },
-                            {
-                                get: () => config.secondary_color || defaultConfig.secondary_color,
-                                set: (value) => {
-                                    config.secondary_color = value;
-                                    window.elementSdk.setConfig({ secondary_color: value });
-                                }
-                            }
-                        ],
-                        borderables: [],
-                        fontEditable: undefined,
-                        fontSizeable: undefined
-                    }),
-                    mapToEditPanelValues: (config) => new Map([
-                        ["main_title", config.main_title || defaultConfig.main_title],
-                        ["subtitle_roles", config.subtitle_roles || defaultConfig.subtitle_roles],
-                        ["game_flow_title", config.game_flow_title || defaultConfig.game_flow_title],
-                        ["revelation_title", config.revelation_title || defaultConfig.revelation_title],
-                        ["revelation_text", config.revelation_text || defaultConfig.revelation_text]
-                    ])
-                });
-            }
+    <div class="relative z-10 max-w-4xl mx-auto px-6">
+      <div class="sj-in sj-d1 mb-6">
+        <span class="sj-badge"><span class="sj-dot"></span>Pitch &amp; investissement · STRATE-JEUX</span>
+      </div>
+      <h1 class="sj-title sj-in sj-d2 mb-6">
+        Business<br><span class="shine">Bluff</span>
+      </h1>
+      <p class="sj-in sj-d3 text-xl md:text-2xl font-semibold opacity-90 mb-10">
+        10 entreprises · des investisseurs · beaucoup de bluff 🎭
+      </p>
+      <div class="sj-in sj-d4">
+        <button onclick="changeSlide(1)" class="sj-cta">
+          C'est parti <span class="arrow">→</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 2 : Les rôles -->
+  <div class="slide scroll sj-hero">
+    <div class="sj-grid"></div>
+    <div class="sj-blob b1"></div>
+    <div class="sj-blob b2"></div>
+
+    <div class="relative z-10 max-w-6xl mx-auto px-6 w-full my-auto py-8">
+      <div class="text-center mb-8 md:mb-10">
+        <div class="sj-in sj-d1 mb-3"><span class="sj-badge">Choisis ton camp</span></div>
+        <h2 class="sj-h2 sj-in sj-d2">Les Rôles</h2>
+      </div>
+
+      <div class="grid md:grid-cols-[1fr_auto_1fr] gap-6 md:gap-8 items-center">
+        <div class="sj-role sj-in sj-d2" style="--role-accent:#FFC94D;">
+          <div class="text-center mb-5">
+            <div class="sj-role-pic">
+              <img src="https://lh3.googleusercontent.com/d/1PMacT71_VH1041j8cW8KKlOdllFbxmOH" alt="Entrepreneur"
+                   onerror="this.outerHTML='💼'">
+            </div>
+            <h3 class="text-3xl font-black">Entrepreneurs</h3>
+          </div>
+          <div class="sj-mission mb-4">🎯 Objectif : convaincre les investisseurs d'investir le plus d'argent possible</div>
+          <div class="space-y-2">
+            <div class="sj-point"><span class="emo">🎤</span><p>Présentez votre activité et défendez vos chiffres</p></div>
+            <div class="sj-point"><span class="emo">⭐</span><p>Mettez en avant vos atouts</p></div>
+            <div class="sj-point"><span class="emo">🎭</span><p>Jouez sur les apparences… et le bluff !</p></div>
+          </div>
+        </div>
+
+        <div class="flex justify-center sj-in sj-d3">
+          <div class="sj-vs">VS</div>
+        </div>
+
+        <div class="sj-role sj-in sj-d4" style="--role-accent:#5CFFB0;">
+          <div class="text-center mb-5">
+            <div class="sj-role-pic">
+              <img src="https://lh3.googleusercontent.com/d/1bLoXjxHqoC9Ht3_EkdKmDlR-4ITPK2u5" alt="Investisseur"
+                   onerror="this.outerHTML='📊'">
+            </div>
+            <h3 class="text-3xl font-black">Investisseurs</h3>
+          </div>
+          <div class="sj-mission mb-4">💰 Objectif : investir intelligemment pour faire fructifier votre argent</div>
+          <div class="space-y-2">
+            <div class="sj-point"><span class="emo">🔍</span><p>Analysez bilans et comptes de résultat</p></div>
+            <div class="sj-point"><span class="emo">🚀</span><p>Repérez les entreprises les plus prometteuses</p></div>
+            <div class="sj-point"><span class="emo">⚠️</span><p>Méfiez-vous : certaines feront perdre de l'argent !</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 3 : Déroulement du jeu -->
+  <div class="slide scroll sj-hero">
+    <div class="sj-grid"></div>
+    <div class="sj-blob b1"></div>
+    <div class="sj-blob b2"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-6 text-center w-full my-auto py-8">
+      <div class="sj-in sj-d1 mb-3"><span class="sj-badge">Le déroulé</span></div>
+      <h2 class="sj-h2 sj-in sj-d2 mb-8">Déroulement du jeu</h2>
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 text-left">
+        <div class="sj-point sj-in sj-d2" style="align-items:flex-start; padding:16px; background:rgba(255,255,255,.12)">
+          <span class="sj-step-num">1</span>
+          <p><span class="font-black block">Face à face</span>Chaque entrepreneur s'installe face à un investisseur.</p>
+        </div>
+        <div class="sj-point sj-in sj-d3" style="align-items:flex-start; padding:16px; background:rgba(255,255,255,.12)">
+          <span class="sj-step-num">2</span>
+          <p><span class="font-black block">Chrono lancé</span>Temps limité pour convaincre ou analyser.</p>
+        </div>
+        <div class="sj-point sj-in sj-d4" style="align-items:flex-start; padding:16px; background:rgba(255,255,255,.12)">
+          <span class="sj-step-num">3</span>
+          <p><span class="font-black block">Décision</span>L'investisseur décide d'investir… ou non.</p>
+        </div>
+        <div class="sj-point sj-in sj-d5" style="align-items:flex-start; padding:16px; background:rgba(255,255,255,.12)">
+          <span class="sj-step-num">4</span>
+          <p><span class="font-black block">Rotation</span>Les entrepreneurs changent de table.</p>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="sj-role sj-in sj-d2" style="--role-accent:#3FA9FF;">
+          <h3 class="text-xl font-black mb-2 opacity-90">1er tour</h3>
+          <p class="text-5xl font-black mb-1">10 min</p>
+          <p class="opacity-80">Premier pitch</p>
+        </div>
+        <div class="sj-role sj-in sj-d3" style="--role-accent:#FFC94D;">
+          <h3 class="text-xl font-black mb-2 opacity-90">2e tour</h3>
+          <p class="text-5xl font-black mb-1">8 min</p>
+          <p class="opacity-80">On accélère</p>
+        </div>
+        <div class="sj-role sj-in sj-d4" style="--role-accent:#5CFFB0;">
+          <h3 class="text-xl font-black mb-2 opacity-90">3e tour et +</h3>
+          <p class="text-5xl font-black mb-1">7 min</p>
+          <p class="opacity-80">Dernières chances</p>
+        </div>
+      </div>
+
+      <div class="mt-8 sj-in sj-d5">
+        <span class="sj-badge" style="text-transform:none; letter-spacing:0; font-size:1rem;">🔮 À la fin : révélation de la vraie performance des entreprises</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 4 : Timer 10 -->
+  <div class="slide sj-hero items-center justify-center">
+    <div class="sj-grid"></div>
+    <div class="sj-blob b1"></div>
+    <div class="sj-blob b2"></div>
+    <div class="relative z-10 px-6 w-full">
+      <div class="text-center mb-6 sj-in sj-d1"><span class="sj-badge"><span class="sj-dot"></span>Pitchs en cours</span></div>
+      <div class="timer-shell text-center sj-in sj-d2">
+        <h2 class="text-3xl md:text-4xl font-black mb-6">1er tour — 10 minutes</h2>
+        <div class="timer-circle mx-auto mb-8" id="timer10">
+          <div class="timer-text" id="timerText10">10:00</div>
+        </div>
+        <div class="flex flex-wrap gap-3 justify-center">
+          <button onclick="startTimer('t10', 10, 'timer10', 'timerText10')" class="sj-btn sj-btn-blue text-lg">▶️ Démarrer</button>
+          <button onclick="pauseTimer('t10')" class="sj-btn sj-btn-amber text-lg">⏸️ Pause</button>
+          <button onclick="resetTimer('t10', 10, 'timer10', 'timerText10')" class="sj-btn sj-btn-soft text-lg">🔄 Reset</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 5 : Timer 8 -->
+  <div class="slide sj-hero items-center justify-center">
+    <div class="sj-grid"></div>
+    <div class="sj-blob b1"></div>
+    <div class="sj-blob b2"></div>
+    <div class="relative z-10 px-6 w-full">
+      <div class="text-center mb-6 sj-in sj-d1"><span class="sj-badge"><span class="sj-dot"></span>Pitchs en cours</span></div>
+      <div class="timer-shell text-center sj-in sj-d2">
+        <h2 class="text-3xl md:text-4xl font-black mb-6">2e tour — 8 minutes</h2>
+        <div class="timer-circle mx-auto mb-8" id="timer8">
+          <div class="timer-text" id="timerText8">8:00</div>
+        </div>
+        <div class="flex flex-wrap gap-3 justify-center">
+          <button onclick="startTimer('t8', 8, 'timer8', 'timerText8')" class="sj-btn sj-btn-blue text-lg">▶️ Démarrer</button>
+          <button onclick="pauseTimer('t8')" class="sj-btn sj-btn-amber text-lg">⏸️ Pause</button>
+          <button onclick="resetTimer('t8', 8, 'timer8', 'timerText8')" class="sj-btn sj-btn-soft text-lg">🔄 Reset</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 6 : Timer 7 -->
+  <div class="slide sj-hero items-center justify-center">
+    <div class="sj-grid"></div>
+    <div class="sj-blob b1"></div>
+    <div class="sj-blob b2"></div>
+    <div class="relative z-10 px-6 w-full">
+      <div class="text-center mb-6 sj-in sj-d1"><span class="sj-badge"><span class="sj-dot"></span>Pitchs en cours</span></div>
+      <div class="timer-shell text-center sj-in sj-d2">
+        <h2 class="text-3xl md:text-4xl font-black mb-6">3e tour et suivants — 7 minutes</h2>
+        <div class="timer-circle mx-auto mb-8" id="timer7">
+          <div class="timer-text" id="timerText7">7:00</div>
+        </div>
+        <div class="flex flex-wrap gap-3 justify-center">
+          <button onclick="startTimer('t7', 7, 'timer7', 'timerText7')" class="sj-btn sj-btn-blue text-lg">▶️ Démarrer</button>
+          <button onclick="pauseTimer('t7')" class="sj-btn sj-btn-amber text-lg">⏸️ Pause</button>
+          <button onclick="resetTimer('t7', 7, 'timer7', 'timerText7')" class="sj-btn sj-btn-soft text-lg">🔄 Reset</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 7 : Révélation -->
+  <div class="slide sj-hero items-center justify-center text-center" data-enter="revelation">
+    <div class="sj-grid"></div>
+    <div class="sj-blob b1"></div>
+    <div class="sj-blob b2"></div>
+    <div class="sj-blob b3"></div>
+    <div class="relative z-10 max-w-4xl mx-auto px-6">
+      <div class="sj-in sj-d1 mb-4"><span class="sj-badge"><span class="sj-dot"></span>Moment de vérité</span></div>
+      <h2 class="sj-h2 sj-in sj-d2 mb-6">Révélation des résultats</h2>
+      <div class="sj-in sj-d3 mb-2">
+        <div class="sj-counter"><span id="yearsCounter">0</span><span style="font-size:.4em"> ans</span></div>
+      </div>
+      <div class="sj-years sj-in sj-d3 mb-8" id="yearsBars"><span></span><span></span><span></span></div>
+      <p class="sj-in sj-d4 text-xl md:text-2xl font-semibold opacity-95 mb-10">
+        3 années se sont écoulées… Voyons qui a réussi à faire fructifier son capital ! 💸
+      </p>
+      <div class="sj-in sj-d5">
+        <button onclick="changeSlide(1)" class="sj-cta">Saisir les investissements <span class="arrow">→</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 8 : Saisie des investissements -->
+  <div class="slide scroll sj-hero">
+    <div class="sj-blob b1"></div>
+    <div class="sj-blob b2"></div>
+    <div class="relative z-10 max-w-7xl mx-auto px-4 md:px-6 pt-8 pb-10 w-full">
+      <div class="text-center mb-6">
+        <div class="sj-in sj-d1 mb-3"><span class="sj-badge">Côté investisseurs</span></div>
+        <h2 class="sj-h2 sj-in sj-d2 mb-2">Saisie des investissements</h2>
+        <p class="sj-in sj-d2 text-lg opacity-90">Montant investi par chaque investisseur dans chaque entreprise</p>
+      </div>
+
+      <div class="flex flex-wrap gap-3 justify-center mb-6 sj-in sj-d3">
+        <span class="sj-badge" style="text-transform:none; letter-spacing:0; font-size:1rem;">💰 Total investi : <span id="grandTotal" class="font-black">0 €</span></span>
+        <button onclick="resetInvestments()" class="sj-btn sj-btn-sm sj-btn-ghost">🧹 Tout effacer</button>
+      </div>
+
+      <div class="sj-panel sj-in sj-d3">
+        <div class="grid lg:grid-cols-2 gap-4" id="investorForms"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 9 : Performances des entreprises -->
+  <div class="slide scroll sj-hero">
+    <div class="sj-blob b1"></div>
+    <div class="sj-blob b2"></div>
+    <div class="relative z-10 max-w-7xl mx-auto px-4 md:px-6 pt-8 pb-10 w-full text-center">
+      <div class="sj-in sj-d1 mb-3"><span class="sj-badge"><span class="sj-dot"></span>3 ans plus tard</span></div>
+      <h2 class="sj-h2 sj-in sj-d2 mb-2">Performances des entreprises</h2>
+      <p class="sj-in sj-d2 text-lg opacity-90 mb-6">Appuie sur une carte pour découvrir son résultat</p>
+      <div class="flex flex-wrap gap-3 justify-center mb-8 sj-in sj-d3">
+        <button onclick="revealAllCompanies()" class="sj-cta pulse-animation" style="font-size:1.1rem; padding:.85rem 2rem;">Tout révéler ✨</button>
+        <button onclick="hideAllCompanies()" class="sj-btn sj-btn-ghost">↺ Retourner les cartes</button>
+      </div>
+      <div id="companies-grid" class="sj-in sj-d4"></div>
+    </div>
+  </div>
+
+  <!-- Slide 10 : Récapitulatif des collectes -->
+  <div class="slide scroll sj-hero" data-enter="summary">
+    <div class="sj-blob b1"></div>
+    <div class="sj-blob b2"></div>
+    <div class="relative z-10 max-w-5xl mx-auto px-4 md:px-6 pt-8 pb-10 w-full">
+      <div class="text-center mb-8">
+        <div class="sj-in sj-d1 mb-3"><span class="sj-badge">Côté entrepreneurs</span></div>
+        <h2 class="sj-h2 sj-in sj-d2 mb-2">Récapitulatif des collectes</h2>
+        <p class="sj-in sj-d2 text-lg opacity-90">Qui a le mieux convaincu ? Total des fonds levés par entreprise</p>
+      </div>
+      <div class="sj-panel sj-in sj-d3">
+        <div class="space-y-3" id="summaryList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 11 : Résultats finaux -->
+  <div class="slide scroll sj-hero" data-enter="results">
+    <div class="sj-blob b1"></div>
+    <div class="sj-blob b2"></div>
+    <div class="sj-blob b3"></div>
+    <div class="relative z-10 max-w-5xl mx-auto px-4 md:px-6 pt-8 pb-10 w-full">
+      <div class="text-center mb-6">
+        <div class="sj-in sj-d1 mb-3"><span class="sj-badge">Résultats</span></div>
+        <h2 class="sj-h2 sj-in sj-d2 mb-2">🏆 Classement des investisseurs</h2>
+        <p class="sj-in sj-d2 text-lg opacity-90">Qui a su déjouer le bluff ?</p>
+      </div>
+
+      <div id="podium" class="podium mb-8"></div>
+
+      <div class="sj-panel sj-in sj-d4">
+        <h3 class="text-2xl font-black mb-4 text-center">Classement complet</h3>
+        <div class="space-y-2" id="results-list"></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Modal pour les images d'entreprises -->
+<div id="company-modal" class="modal" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <div class="flex justify-between items-center mb-4 gap-4">
+      <h3 id="modal-company-name" class="text-2xl font-black" style="color:#061A5C"></h3>
+      <button onclick="closeModal()" class="sj-btn sj-btn-sm sj-btn-soft" aria-label="Fermer">✕</button>
+    </div>
+    <img id="modal-company-image" src="" alt="" class="w-full rounded-2xl bg-gray-50" style="max-height:70vh; object-fit:contain">
+  </div>
+</div>
+
+<script>
+  /**********************
+   * Données des entreprises
+   **********************/
+  const companies = [
+    { name: "ÉCOHABITAT",    performance: 0.5,  logo: "https://lh3.googleusercontent.com/d/1tjD6blPeQSNqJttbwSgFQ9_sU58cX1kC", popupImage: "https://lh3.googleusercontent.com/d/1vxBHKVli9-e4r9w6Q8o5Fdk3UkG2oE_S" },
+    { name: "CAFÉ 360°",     performance: -0.8, logo: "https://lh3.googleusercontent.com/d/12uPUTVPcexP6QFPuaIeathMsrDrDNVWb", popupImage: "https://lh3.googleusercontent.com/d/1aZhie1GW951Y-6tjWBZ2Pu5hjukN3Grg" },
+    { name: "PET ASSISTANT", performance: -0.8, logo: "https://lh3.googleusercontent.com/d/1-FAD01VueecY3ZafkA7wlWjiDrjVhnlk", popupImage: "https://lh3.googleusercontent.com/d/1cTqRyq65OjanvoDT9C_1TmjD9gaasTPQ" },
+    { name: "HEALTH CUBE",   performance: 0.25, logo: "https://lh3.googleusercontent.com/d/15BAPIyu_e56vBw5xkr2hSPS02fhATYhm", popupImage: "https://lh3.googleusercontent.com/d/1sAOO__8tVno555WwnMFsPxppgGuCxt9P" },
+    { name: "BENTO EXPRESS", performance: 0.25, logo: "https://lh3.googleusercontent.com/d/11e05O7zJaUDwd8Kf3ZR_CSbz6hxg8611", popupImage: "https://lh3.googleusercontent.com/d/17870I4zp01DsSDAqAz7kDVacXnTwfUd3" },
+    { name: "GREEN PRINT",   performance: -0.5, logo: "https://lh3.googleusercontent.com/d/1qDLT40pJ7x2JhT5pODm0REf-9F_C2Tc6", popupImage: "https://lh3.googleusercontent.com/d/1yHtaGofnRmWp3ySHreUjZSRbFliL2jpG" },
+    { name: "COSY PLACE",    performance: -0.5, logo: "https://lh3.googleusercontent.com/d/1hcSlZFxDUFR-owWdYd4BE_WCBxQC61kT", popupImage: "https://lh3.googleusercontent.com/d/1M08XIeURG_j-onMqDdW2c7k93EEL1kvQ" },
+    { name: "ARGILIGHT",     performance: 0.5,  logo: "https://lh3.googleusercontent.com/d/14up3r1-xsZUxKeYjcwgy-NatKTOeI3_v", popupImage: "https://lh3.googleusercontent.com/d/1OVQGHn2E_f5G0ayoSrrH7vF7PrPAq2vz" },
+    { name: "FLASH FOODIES", performance: -0.5, logo: "https://lh3.googleusercontent.com/d/1gEw2Wm6QKq33hyTyJWxBrozpijmy148N", popupImage: "https://lh3.googleusercontent.com/d/1_-zC878jd7CpQkQQIexG-UkhI-R6J05x" },
+    { name: "VERTIFERME",    performance: 0.5,  logo: "https://lh3.googleusercontent.com/d/1xmjWsq10YjkXgR_ANZoHbnN5Hr-MV-Kf", popupImage: "https://lh3.googleusercontent.com/d/1XTA-3wXHsaNJkOlLRe_8M3iG7Av5j9tF" }
+  ];
+
+  const NB_INVESTORS = 10;
+  const investorColors = ["#3FA9FF", "#FFC94D", "#5CFFB0", "#FF94E8", "#FF7575", "#7CC4FF", "#FFAD5C", "#ACE6B2", "#E1A9F5", "#1CE8E5"];
+
+  const LS_KEY = "bb_investments_v1";
+  let investments = {};
+
+  function loadInvestments() {
+    try { investments = JSON.parse(localStorage.getItem(LS_KEY) || "{}"); }
+    catch { investments = {}; }
+  }
+  function saveInvestmentsToLocalStorage() {
+    try { localStorage.setItem(LS_KEY, JSON.stringify(investments)); } catch {}
+  }
+
+  const euro = (n) => `${Math.round(n).toLocaleString("fr-FR")} €`;
+  const signedEuro = (n) => `${n >= 0 ? "+" : "−"}${Math.abs(Math.round(n)).toLocaleString("fr-FR")} €`;
+  const initial = (name) => name.replace(/[^A-Za-zÀ-ÿ]/g, "").charAt(0) || "?";
+
+  function logoImg(company, cls, extraStyle = "") {
+    return `<img class="${cls}" style="${extraStyle}" src="${company.logo}" alt="Logo ${company.name}" loading="lazy" decoding="async"
+      onerror="this.outerHTML='<div class=&quot;${cls} co-logo-fallback&quot; style=&quot;${extraStyle}&quot;>${initial(company.name)}</div>'">`;
+  }
+
+  /* Slides */
+  let currentSlide = 0;
+  const slides = () => document.querySelectorAll(".slide");
+
+  function goToSlide(index) {
+    const all = slides();
+    if (index < 0 || index >= all.length || index === currentSlide) return;
+    all[currentSlide].classList.remove("active");
+    currentSlide = index;
+    all[currentSlide].classList.add("active");
+    all[currentSlide].scrollTop = 0;
+    updateSlideCounter();
+    onSlideEnter(all[currentSlide].dataset.enter);
+  }
+  function changeSlide(direction) { goToSlide(currentSlide + direction); }
+
+  function updateSlideCounter() {
+    const total = slides().length;
+    document.getElementById("currentSlideNumber").textContent = currentSlide + 1;
+    document.getElementById("totalSlides").textContent = total;
+    document.getElementById("prevBtn").disabled = currentSlide === 0;
+    document.getElementById("nextBtn").disabled = currentSlide === total - 1;
+    document.getElementById("progressBar").style.width = `${((currentSlide + 1) / total) * 100}%`;
+    document.querySelectorAll("#slideDots button").forEach((dot, i) => dot.classList.toggle("on", i === currentSlide));
+  }
+
+  function buildDots() {
+    const dots = document.getElementById("slideDots");
+    slides().forEach((_, i) => {
+      const dot = document.createElement("button");
+      dot.setAttribute("aria-label", `Slide ${i + 1}`);
+      dot.onclick = () => goToSlide(i);
+      dots.appendChild(dot);
+    });
+  }
+
+  function onSlideEnter(name) {
+    if (name === "revelation") animateYears();
+    if (name === "summary") renderSummary();
+    if (name === "results") renderResults(true);
+  }
+
+  /* Slide 1 : logos flottants */
+  function buildFloaters() {
+    const spots = [
+      "top:12%; left:8%", "top:20%; right:10%", "bottom:16%; left:12%", "bottom:12%; right:14%",
+      "top:48%; left:3%", "top:52%; right:4%", "top:6%; left:42%", "bottom:4%; left:46%"
+    ];
+    const items = [companies[0], "💰", companies[3], companies[7], "📈", companies[9], companies[4], "🎭"];
+    document.getElementById("heroFloaters").innerHTML = items.map((item, i) => {
+      const delay = `animation-delay:${-i * 0.8}s, ${0.1 + i * 0.1}s`;
+      if (typeof item === "string") return `<div class="sj-floater coin" style="${spots[i]}; ${delay}">${item}</div>`;
+      return `<div class="sj-floater" style="${spots[i]}; ${delay}">${logoImg(item, "", "width:100%;height:100%;object-fit:contain")}</div>`;
+    }).join("");
+  }
+
+  /* Timers */
+  const timers = {
+    t10: { interval: null, paused: false, current: 0, total: 10 * 60 },
+    t8:  { interval: null, paused: false, current: 0, total:  8 * 60 },
+    t7:  { interval: null, paused: false, current: 0, total:  7 * 60 }
+  };
+
+  function startTimer(timerKey, minutes, timerId, textId) {
+    const t = timers[timerKey];
+    if (!t) return;
+
+    clearInterval(t.interval);
+    t.paused = false;
+    document.getElementById(timerId).classList.remove("done");
+
+    if (t.current === 0) {
+      t.total = minutes * 60;
+      t.current = t.total;
+    }
+
+    t.interval = setInterval(() => {
+      if (!t.paused) {
+        t.current--;
+        updateTimerDisplay(timerId, textId, t.current, t.total);
+
+        if (t.current <= 0) {
+          clearInterval(t.interval);
+          const circle = document.getElementById(timerId);
+          circle.style.background = "conic-gradient(from 0deg, #ef4444 360deg, #ef4444 360deg)";
+          circle.classList.add("done");
+          document.getElementById(textId).textContent = "FINI !";
+          t.current = 0;
         }
+      }
+    }, 1000);
+  }
 
-        // Mise à jour des classes de couleur
-        function updateColorClasses(config) {
-            const primaryColor = config.primary_color || defaultConfig.primary_color;
-            const surfaceColor = config.surface_color || defaultConfig.surface_color;
-            const textColor = config.text_color || defaultConfig.text_color;
-            const secondaryColor = config.secondary_color || defaultConfig.secondary_color;
-            
-            // Mise à jour des éléments avec classes de couleur
-            document.querySelectorAll('.primary-text').forEach(el => {
-                el.style.color = primaryColor;
-            });
-            
-            document.querySelectorAll('.main-text').forEach(el => {
-                el.style.color = textColor;
-            });
-            
-            document.querySelectorAll('.secondary-text').forEach(el => {
-                el.style.color = secondaryColor;
-            });
-            
-            document.querySelectorAll('.card-surface').forEach(el => {
-                el.style.backgroundColor = surfaceColor;
-            });
-            
-            document.querySelectorAll('.primary-bg').forEach(el => {
-                el.style.backgroundColor = primaryColor;
-            });
-            
-            document.querySelectorAll('.secondary-bg').forEach(el => {
-                el.style.backgroundColor = secondaryColor;
-            });
-            
-            document.querySelectorAll('.success-bg').forEach(el => {
-                el.style.backgroundColor = '#E6F7E6';
-            });
-        }
+  function pauseTimer(timerKey) {
+    const t = timers[timerKey];
+    if (!t) return;
+    t.paused = !t.paused;
+  }
 
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', function() {
-            initSDK();
-            generateInvestmentForms();
-            generateCompanyCards();
-            generateCompanySummary();
-            updateNavigation();
-            
-            // Application initiale des couleurs
-            updateColorClasses(defaultConfig);
+  function resetTimer(timerKey, minutes, timerId, textId) {
+    const t = timers[timerKey];
+    if (!t) return;
+
+    clearInterval(t.interval);
+    t.total = minutes * 60;
+    t.current = t.total;
+    t.paused = false;
+    document.getElementById(timerId).classList.remove("done");
+    updateTimerDisplay(timerId, textId, t.current, t.total);
+  }
+
+  function updateTimerDisplay(timerId, textId, current, total) {
+    const m = Math.floor(current / 60);
+    const s = current % 60;
+    document.getElementById(textId).textContent = `${m}:${String(s).padStart(2, "0")}`;
+
+    const deg = ((total - current) / total) * 360;
+    const color = current > total * 0.3 ? "#10b981" : current > total * 0.1 ? "#f59e0b" : "#ef4444";
+
+    document.getElementById(timerId).style.background =
+      `conic-gradient(from 0deg, ${color} ${deg}deg, #e5e7eb ${deg}deg)`;
+  }
+
+  /* Slide 7 : compteur des années */
+  let yearsAnim = null;
+  function animateYears() {
+    clearInterval(yearsAnim);
+    const counter = document.getElementById("yearsCounter");
+    const bars = document.querySelectorAll("#yearsBars span");
+    let year = 0;
+    counter.textContent = "0";
+    bars.forEach(b => b.classList.remove("on"));
+    yearsAnim = setInterval(() => {
+      bars[year].classList.add("on");
+      year++;
+      counter.textContent = year;
+      if (year >= 3) clearInterval(yearsAnim);
+    }, 900);
+  }
+
+  /* Slide 8 : saisie des investissements */
+  function generateInvestmentForms() {
+    const container = document.getElementById("investorForms");
+    container.innerHTML = "";
+
+    for (let investor = 1; investor <= NB_INVESTORS; investor++) {
+      const card = document.createElement("div");
+      card.className = "inv-card";
+      card.style.setProperty("--accent", investorColors[investor - 1]);
+
+      card.innerHTML = `
+        <div class="flex items-center justify-between mb-3 gap-3">
+          <div class="flex items-center gap-3">
+            <span class="inv-num" style="background:${investorColors[investor - 1]}; color:#061A5C">${investor}</span>
+            <h3 class="text-lg font-black" style="color:#061A5C">Investisseur ${investor}</h3>
+          </div>
+          <span class="inv-total" id="inv-total-${investor}">0 €</span>
+        </div>
+        <div class="grid grid-cols-5 gap-1">
+          ${companies.map((company, index) => {
+            const key = `investor${investor}_company${index + 1}`;
+            const value = investments[key] || "";
+            return `
+              <label class="inv-field">
+                ${logoImg(company, "co-mini", "font-size:.9rem")}
+                <span class="co-name">${company.name}</span>
+                <input type="number" inputmode="numeric"
+                       class="investment-input ${value ? "filled" : ""}"
+                       min="0" step="100" placeholder="0" value="${value}"
+                       oninput="saveInvestment(${investor}, ${index + 1}, this)">
+              </label>`;
+          }).join("")}
+        </div>
+      `;
+      container.appendChild(card);
+    }
+    updateInvestorTotals();
+  }
+
+  function saveInvestment(investor, company, input) {
+    const amount = Math.max(0, parseInt(input.value, 10) || 0);
+    const key = `investor${investor}_company${company}`;
+    if (amount > 0) investments[key] = amount;
+    else delete investments[key];
+    input.classList.toggle("filled", amount > 0);
+    saveInvestmentsToLocalStorage();
+    updateInvestorTotals();
+  }
+
+  function updateInvestorTotals() {
+    let grand = 0;
+    for (let investor = 1; investor <= NB_INVESTORS; investor++) {
+      let total = 0;
+      for (let company = 1; company <= companies.length; company++) {
+        total += investments[`investor${investor}_company${company}`] || 0;
+      }
+      grand += total;
+      document.getElementById(`inv-total-${investor}`).textContent = euro(total);
+    }
+    document.getElementById("grandTotal").textContent = euro(grand);
+  }
+
+  function resetInvestments() {
+    if (!confirm("Effacer tous les montants saisis ?")) return;
+    investments = {};
+    saveInvestmentsToLocalStorage();
+    generateInvestmentForms();
+  }
+
+  /* Slide 9 : cartes des entreprises */
+  function generateCompanyCards() {
+    const grid = document.getElementById("companies-grid");
+    grid.innerHTML = "";
+
+    companies.forEach((company, index) => {
+      const isPositive = company.performance > 0;
+      const percentage = Math.abs(company.performance * 100);
+      const card = document.createElement("div");
+      card.className = "co-card";
+      card.style.setProperty("--res", isPositive ? "#10B981" : "#EF4444");
+      card.style.setProperty("--res-soft", isPositive ? "#ECFDF5" : "#FEF2F2");
+      card.onclick = () => card.classList.toggle("revealed");
+
+      card.innerHTML = `
+        <div class="co-inner">
+          <div class="co-face co-back">
+            ${logoImg(company, "co-logo")}
+            <div class="font-black text-lg leading-tight">${company.name}</div>
+            <div class="text-sm opacity-80 mt-1">Appuie pour révéler</div>
+          </div>
+          <div class="co-face co-front">
+            <div class="text-4xl mb-1">${isPositive ? "🚀" : "📉"}</div>
+            <div class="font-black text-base leading-tight mb-2" style="color:#061A5C">${company.name}</div>
+            <div class="co-perf mb-2">${isPositive ? "+" : "−"}${percentage}%</div>
+            <span class="co-tag mb-3">${isPositive ? "Pari gagnant 🎉" : "Pari perdant ❌"}</span>
+            <button onclick="openModal(${index}); event.stopPropagation();" class="sj-btn sj-btn-sm sj-btn-blue">+ info</button>
+          </div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function revealAllCompanies() {
+    document.querySelectorAll(".co-card").forEach((card, i) => {
+      setTimeout(() => card.classList.add("revealed"), i * 140);
+    });
+  }
+  function hideAllCompanies() {
+    document.querySelectorAll(".co-card").forEach(card => card.classList.remove("revealed"));
+  }
+
+  /* Modal */
+  function openModal(companyIndex) {
+    const company = companies[companyIndex];
+    document.getElementById("modal-company-name").textContent = company.name;
+    const img = document.getElementById("modal-company-image");
+    img.src = company.popupImage;
+    img.alt = company.name;
+    document.getElementById("company-modal").classList.add("show");
+  }
+  function closeModal() {
+    document.getElementById("company-modal").classList.remove("show");
+  }
+
+  /* Slide 10 : récapitulatif des collectes */
+  function computeCompanyTotals() {
+    return companies.map((company, index) => {
+      let total = 0, count = 0;
+      for (let investor = 1; investor <= NB_INVESTORS; investor++) {
+        const amount = investments[`investor${investor}_company${index + 1}`] || 0;
+        if (amount > 0) { total += amount; count++; }
+      }
+      return { company, total, count };
+    });
+  }
+
+  function renderSummary() {
+    const rows = computeCompanyTotals().sort((a, b) => b.total - a.total);
+    const max = Math.max(...rows.map(r => r.total), 1);
+    const container = document.getElementById("summaryList");
+    const medal = (i, total) => total > 0 && i < 3 ? ["🥇", "🥈", "🥉"][i] : i + 1;
+
+    container.innerHTML = rows.map((r, i) => `
+      <div class="row-white flex items-center gap-3 sj-in" style="animation-delay:${i * 0.06}s">
+        <span class="rank-pill">${medal(i, r.total)}</span>
+        ${logoImg(r.company, "co-mini", "width:46px;height:46px;flex:none;font-size:1.1rem")}
+        <div class="flex-1 min-w-0">
+          <div class="flex items-baseline justify-between gap-3 mb-1">
+            <span class="font-black truncate" style="color:#061A5C">${r.company.name}</span>
+            <span class="font-black text-xl whitespace-nowrap" style="color:#0E55E6">${euro(r.total)}</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="bar-track flex-1"><div class="bar-fill" data-width="${(r.total / max) * 100}"></div></div>
+            <span class="text-sm text-gray-500 whitespace-nowrap">👥 ${r.count} investisseur${r.count > 1 ? "s" : ""}</span>
+          </div>
+        </div>
+      </div>
+    `).join("");
+
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      container.querySelectorAll(".bar-fill").forEach(bar => bar.style.width = `${bar.dataset.width}%`);
+    }));
+  }
+
+  /* Slide 11 : résultats finaux */
+  function computeResults() {
+    const results = [];
+    for (let investor = 1; investor <= NB_INVESTORS; investor++) {
+      let totalInvestment = 0;
+      let totalGain = 0;
+      companies.forEach((company, index) => {
+        const amount = investments[`investor${investor}_company${index + 1}`] || 0;
+        totalInvestment += amount;
+        totalGain += amount * company.performance;
+      });
+      // Ne garder que les investisseurs qui ont investi au moins 1 €
+      if (totalInvestment > 0) {
+        results.push({
+          investor,
+          name: `Investisseur ${investor}`,
+          investment: totalInvestment,
+          gain: totalGain,
+          percentage: (totalGain / totalInvestment) * 100
         });
+      }
+    }
+    return results.sort((a, b) => b.gain - a.gain);
+  }
 
-        // Gestion des flip cards des rôles
-        function flipCard(cardType) {
-            const card = document.getElementById(cardType + '-card').parentElement;
-            card.classList.toggle('flipped');
-            
-            // Auto-retour après 5 minutes
-            if (card.classList.contains('flipped')) {
-                if (flipTimeouts[cardType]) {
-                    clearTimeout(flipTimeouts[cardType]);
-                }
-                flipTimeouts[cardType] = setTimeout(() => {
-                    card.classList.remove('flipped');
-                }, 300000); // 5 minutes
-            } else {
-                if (flipTimeouts[cardType]) {
-                    clearTimeout(flipTimeouts[cardType]);
-                    delete flipTimeouts[cardType];
-                }
-            }
-        }
+  function renderResults(celebrate) {
+    const results = computeResults();
+    const podium = document.getElementById("podium");
+    const list = document.getElementById("results-list");
 
-        // Gestion des timers
-        function startTimer(slideNum, totalSeconds) {
-            if (timers[slideNum]) {
-                clearInterval(timers[slideNum].interval);
-            }
-            
-            timers[slideNum] = {
-                remaining: totalSeconds,
-                total: totalSeconds,
-                interval: null
-            };
-            
-            timers[slideNum].interval = setInterval(() => {
-                timers[slideNum].remaining--;
-                updateTimerDisplay(slideNum);
-                
-                if (timers[slideNum].remaining <= 0) {
-                    clearInterval(timers[slideNum].interval);
-                }
-            }, 1000);
-        }
+    if (results.length === 0) {
+      podium.innerHTML = "";
+      podium.style.minHeight = "0";
+      list.innerHTML = `<p class="text-center text-white/80 py-4">Saisis les investissements (slide 8) pour voir le classement 💡</p>`;
+      return;
+    }
+    podium.style.minHeight = "";
 
-        function pauseTimer(slideNum) {
-            if (timers[slideNum] && timers[slideNum].interval) {
-                clearInterval(timers[slideNum].interval);
-                timers[slideNum].interval = null;
-            }
-        }
+    // Ordre visuel : 2e, 1er, 3e
+    const places = [
+      { rank: 2, height: 150, medal: "#E5E7EB", dark: "#9CA3AF", emoji: "🥈", delay: ".5s" },
+      { rank: 1, height: 200, medal: "#FFD976", dark: "#F59E0B", emoji: "🥇", delay: ".9s" },
+      { rank: 3, height: 110, medal: "#F4B183", dark: "#B45309", emoji: "🥉", delay: ".2s" }
+    ];
+    podium.innerHTML = places.map(p => {
+      const r = results[p.rank - 1];
+      if (!r) return `<div class="podium-col"></div>`;
+      return `
+        <div class="podium-col" style="--medal:${p.medal}; --medal-dark:${p.dark}; --delay:${p.delay}">
+          <div class="podium-avatar">${p.emoji}</div>
+          <div class="font-black text-center leading-tight mb-1">${r.name}</div>
+          <div class="font-black text-lg mb-2" style="color:${r.gain >= 0 ? "#5CFFB0" : "#FFB4B4"}">${signedEuro(r.gain)}</div>
+          <div class="podium-step" style="height:${p.height}px">
+            <span class="text-4xl font-black">${p.rank}</span>
+          </div>
+        </div>`;
+    }).join("");
 
-        function resetTimer(slideNum, totalSeconds) {
-            if (timers[slideNum]) {
-                clearInterval(timers[slideNum].interval);
-            }
-            timers[slideNum] = {
-                remaining: totalSeconds,
-                total: totalSeconds,
-                interval: null
-            };
-            updateTimerDisplay(slideNum);
-        }
+    const medal = (i) => i < 3 ? ["🥇", "🥈", "🥉"][i] : i + 1;
+    list.innerHTML = results.map((r, i) => {
+      const color = r.gain >= 0 ? "#059669" : "#DC2626";
+      return `
+        <div class="row-white flex items-center justify-between gap-3 border-l-4 sj-in"
+             style="border-left-color:${color}; animation-delay:${0.6 + i * 0.06}s">
+          <div class="flex items-center gap-3 min-w-0">
+            <span class="rank-pill">${medal(i)}</span>
+            <div class="min-w-0">
+              <p class="font-black truncate" style="color:#061A5C">${r.name}</p>
+              <p class="text-sm text-gray-500">Investi : ${euro(r.investment)}</p>
+            </div>
+          </div>
+          <div class="text-right whitespace-nowrap">
+            <div class="text-2xl font-black" style="color:${color}">${signedEuro(r.gain)}</div>
+            <div class="text-sm font-bold" style="color:${color}">${r.percentage >= 0 ? "+" : ""}${r.percentage.toFixed(1)} %</div>
+          </div>
+        </div>`;
+    }).join("");
 
-        function updateTimerDisplay(slideNum) {
-            const timer = timers[slideNum];
-            const minutes = Math.floor(timer.remaining / 60);
-            const seconds = timer.remaining % 60;
-            const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            
-            document.getElementById(`timer-display-${slideNum}`).textContent = display;
-            
-            // Mise à jour du cercle de progression
-            const progress = (timer.total - timer.remaining) / timer.total;
-            const circumference = 2 * Math.PI * 140;
-            const offset = circumference * progress;
-            document.getElementById(`timer-progress-${slideNum}`).style.strokeDashoffset = offset;
-        }
+    if (celebrate) setTimeout(launchConfetti, 1100);
+  }
 
-        // Génération des formulaires d'investissement
-        function generateInvestmentForms() {
-            const investors1_5 = document.getElementById('investors-1-5');
-            const investors6_10 = document.getElementById('investors-6-10');
-            
-            for (let investor = 1; investor <= 10; investor++) {
-                const investorDiv = document.createElement('div');
-                investorDiv.className = 'card-surface rounded-2xl shadow-lg p-6';
-                
-                investorDiv.innerHTML = `
-                    <h3 class="text-xl font-semibold mb-4 primary-text">Investisseur ${investor}</h3>
-                    <div class="grid grid-cols-5 gap-3">
-                        ${companies.map((company, index) => `
-                            <div class="text-center">
-                                <label class="block text-xs font-medium mb-2 main-text">${company.name}</label>
-                                <input type="number" 
-                                       class="investment-input" 
-                                       id="investor${investor}_company${index + 1}"
-                                       min="0" 
-                                       step="100"
-                                       placeholder="0"
-                                       onchange="saveInvestment(${investor}, ${index + 1}, this.value)">
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-                
-                if (investor <= 5) {
-                    investors1_5.appendChild(investorDiv);
-                } else {
-                    investors6_10.appendChild(investorDiv);
-                }
-            }
-        }
+  /* Confettis */
+  function launchConfetti() {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const colors = ["#FFC94D", "#5CFFB0", "#3FA9FF", "#FF94E8", "#FFFFFF", "#FF7575"];
+    for (let i = 0; i < 120; i++) {
+      const piece = document.createElement("div");
+      piece.className = "confetti";
+      piece.style.left = `${Math.random() * 100}vw`;
+      piece.style.background = colors[i % colors.length];
+      piece.style.setProperty("--dx", `${(Math.random() - 0.5) * 30}vw`);
+      piece.style.setProperty("--rot", `${(Math.random() - 0.5) * 1440}deg`);
+      piece.style.animationDuration = `${2.5 + Math.random() * 2}s`;
+      piece.style.animationDelay = `${Math.random() * 0.6}s`;
+      document.body.appendChild(piece);
+      setTimeout(() => piece.remove(), 5500);
+    }
+  }
 
-        // Génération des cartes d'entreprises
-        function generateCompanyCards() {
-            const grid = document.getElementById('companies-grid');
-            
-            companies.forEach((company, index) => {
-                const cardDiv = document.createElement('div');
-                cardDiv.className = 'company-flip-card';
-                cardDiv.onclick = () => flipCompanyCard(index);
-                
-                const isPositive = company.performance > 0;
-                const percentage = Math.abs(company.performance * 100);
-                
-                cardDiv.innerHTML = `
-                    <div class="company-flip-card-inner" id="company-card-${index}">
-                        <div class="company-flip-card-front card-surface p-4 flex flex-col items-center justify-center">
-                            <img src="${company.logo}" alt="${company.name}" class="h-40 w-40 object-cover rounded-lg mb-3" onerror="this.src=''; this.alt='Logo non disponible'; this.style.display='none';">
-                            <h3 class="text-lg font-bold mb-2 text-center primary-text">${company.name}</h3>
-                            <p class="text-sm secondary-text">Voir la performance</p>
-                        </div>
-                        <div class="company-flip-card-back p-4 flex flex-col justify-center text-center" style="background-color: ${isPositive ? '#E6F7E6' : '#FDE8E8'};">
-                            <h4 class="text-lg font-bold mb-3" style="color: ${isPositive ? '#166534' : '#B91C1C'};">
-                                ${isPositive ? 'Félicitations 🎉 !' : 'Dommage ❌ !'}
-                            </h4>
-                            <p class="text-sm mb-4 main-text">
-                                <strong>${company.name}</strong> — Vos résultats sont ${isPositive ? 'excellents' : 'décevants'}. 
-                                Les investisseurs ont ${isPositive ? 'gagné' : 'perdu'} ${isPositive ? '+' : '-'}${percentage}% sur leur investissement.
-                            </p>
-                            <button onclick="openModal('${company.name}', ${index}); event.stopPropagation();" 
-                                    class="text-white px-4 py-2 rounded-lg text-sm font-medium primary-bg">+ info</button>
-                        </div>
-                    </div>
-                `;
-                
-                grid.appendChild(cardDiv);
-            });
-        }
+  /* Clavier : flèches pour naviguer (sauf pendant la saisie), Échap pour fermer */
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") { closeModal(); return; }
+    if (e.target.matches("input, textarea, select")) return;
+    if (e.key === "ArrowRight" || e.key === "PageDown") changeSlide(1);
+    if (e.key === "ArrowLeft" || e.key === "PageUp") changeSlide(-1);
+  });
 
-        // Génération du récapitulatif des collectes
-        function generateCompanySummary() {
-            const summary1_5 = document.getElementById('summary-companies-1-5');
-            const summary6_10 = document.getElementById('summary-companies-6-10');
-            
-            companies.forEach((company, index) => {
-                const summaryDiv = document.createElement('div');
-                summaryDiv.className = 'card-surface rounded-2xl shadow-lg p-6';
-                
-                summaryDiv.innerHTML = `
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-xl font-bold primary-text">${company.name}</h3>
-                        <img src="${company.logo}" alt="${company.name}" class="h-12 w-12 object-cover rounded-lg" onerror="this.style.display='none';">
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <div class="text-sm secondary-text">Total collecté</div>
-                            <div id="company-total-${index + 1}" class="text-3xl font-bold" style="color: #166534;">0 €</div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-sm secondary-text">Nb investisseurs</div>
-                            <div id="company-investors-${index + 1}" class="text-2xl font-semibold primary-text">0</div>
-                        </div>
-                    </div>
-                    <div class="mt-4">
-                        <div class="bg-gray-200 rounded-full h-3">
-                            <div id="company-bar-${index + 1}" class="h-3 rounded-full transition-all duration-500 primary-bg" style="width: 0%;"></div>
-                        </div>
-                    </div>
-                `;
-                
-                if (index < 5) {
-                    summary1_5.appendChild(summaryDiv);
-                } else {
-                    summary6_10.appendChild(summaryDiv);
-                }
-            });
-        }
+  document.getElementById("company-modal").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) closeModal();
+  });
 
-        // Gestion des flip cards d'entreprises
-        function flipCompanyCard(index) {
-            const card = document.getElementById(`company-card-${index}`).parentElement;
-            card.classList.toggle('flipped');
-        }
-
-        // Gestion du modal
-        function openModal(companyName, companyIndex) {
-            const company = companies[companyIndex];
-            document.getElementById('modal-company-name').textContent = companyName;
-            document.getElementById('modal-company-image').src = company.popupImage;
-            document.getElementById('company-modal').classList.add('show');
-        }
-
-        function closeModal() {
-            document.getElementById('company-modal').classList.remove('show');
-        }
-
-        // Sauvegarde des investissements
-        function saveInvestment(investor, company, value) {
-            const amount = parseInt(value) || 0;
-            const key = `investor${investor}_company${company}`;
-            investments[key] = amount;
-            
-            calculateCompanyTotals();
-            calculateResults();
-        }
-
-        // Calcul des totaux par entreprise
-        function calculateCompanyTotals() {
-            const companyTotals = new Array(10).fill(0);
-            const companyInvestors = new Array(10).fill(0);
-            
-            for (let company = 1; company <= 10; company++) {
-                for (let investor = 1; investor <= 10; investor++) {
-                    const key = `investor${investor}_company${company}`;
-                    const investment = investments[key] || 0;
-                    if (investment > 0) {
-                        companyTotals[company - 1] += investment;
-                        companyInvestors[company - 1]++;
-                    }
-                }
-            }
-            
-            const maxTotal = Math.max(...companyTotals, 1);
-            
-            companyTotals.forEach((total, index) => {
-                const totalElement = document.getElementById(`company-total-${index + 1}`);
-                const investorsElement = document.getElementById(`company-investors-${index + 1}`);
-                const barElement = document.getElementById(`company-bar-${index + 1}`);
-                
-                if (totalElement) totalElement.textContent = `${total.toLocaleString()} €`;
-                if (investorsElement) investorsElement.textContent = companyInvestors[index];
-                if (barElement) {
-                    const percentage = (total / maxTotal) * 100;
-                    barElement.style.width = `${percentage}%`;
-                }
-            });
-        }
-
-        // Calcul des résultats
-        function calculateResults() {
-            const results = [];
-            
-            for (let investor = 1; investor <= 10; investor++) {
-                let totalInvestment = 0;
-                let totalReturn = 0;
-                
-                for (let company = 1; company <= 10; company++) {
-                    const key = `investor${investor}_company${company}`;
-                    const investment = investments[key] || 0;
-                    const performance = companies[company - 1].performance;
-                    const returnValue = investment + (investment * performance);
-                    
-                    totalInvestment += investment;
-                    totalReturn += returnValue;
-                }
-                
-                const totalGain = totalReturn - totalInvestment;
-                
-                // Ne garder que les investisseurs qui ont investi au moins 1€
-                if (totalInvestment > 0) {
-                    results.push({
-                        investor: investor,
-                        name: `Investisseur ${investor}`,
-                        investment: totalInvestment,
-                        gain: totalGain,
-                        percentage: totalInvestment > 0 ? ((totalGain / totalInvestment) * 100) : 0
-                    });
-                }
-            }
-            
-            results.sort((a, b) => b.gain - a.gain);
-            
-            displayPodium(results);
-            displayResultsList(results);
-        }
-
-        // Affichage du podium
-        function displayPodium(results) {
-            const podium = document.getElementById('podium');
-            podium.innerHTML = '';
-            
-            const topThree = results.slice(0, 3);
-            const positions = [1, 0, 2]; // Ordre visuel: 2ème, 1er, 3ème
-            const heights = ['h-24', 'h-32', 'h-20'];
-            const colors = ['#C0C0C0', '#FFD700', '#CD7F32']; // Argent, Or, Bronze
-            const medals = ['🥈', '🥇', '🥉'];
-            const ranks = [2, 1, 3]; // Position réelle affichée
-            
-            positions.forEach((pos, index) => {
-                if (topThree[pos]) {
-                    const result = topThree[pos];
-                    const podiumStep = document.createElement('div');
-                    podiumStep.className = `${heights[index]} w-32 rounded-t-2xl flex flex-col justify-end items-center p-2 text-white font-bold shadow-lg`;
-                    podiumStep.style.backgroundColor = colors[index];
-                    podiumStep.innerHTML = `
-                        <div class="text-3xl mb-1">${medals[index]}</div>
-                        <div class="text-sm text-center">${result.name}</div>
-                        <div class="text-lg">${result.gain >= 0 ? '+' : ''}${Math.round(result.gain)} €</div>
-                        <div class="text-xs">${ranks[index]}${ranks[index] === 1 ? 'er' : 'ème'}</div>
-                    `;
-                    podium.appendChild(podiumStep);
-                }
-            });
-        }
-
-        // Affichage de la liste des résultats
-        function displayResultsList(results) {
-            const resultsList = document.getElementById('results-list');
-            resultsList.innerHTML = '';
-            
-            results.forEach((result, index) => {
-                const row = document.createElement('div');
-                row.className = `p-4 flex items-center justify-between`;
-                row.style.backgroundColor = result.gain >= 0 ? '#E6F7E6' : '#FDE8E8';
-                
-                const rankIcon = index < 3 ? ['🥇', '🥈', '🥉'][index] : `${index + 1}`;
-                
-                row.innerHTML = `
-                    <div class="flex items-center space-x-4">
-                        <div class="text-2xl font-bold w-12 text-center">${rankIcon}</div>
-                        <div>
-                            <div class="font-semibold text-lg main-text">${result.name}</div>
-                            <div class="text-sm secondary-text">Investissement: ${result.investment} €</div>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-2xl font-bold" style="color: ${result.gain >= 0 ? '#166534' : '#B91C1C'};">
-                            ${result.gain >= 0 ? '+' : ''}${Math.round(result.gain)} €
-                        </div>
-                        <div class="text-sm" style="color: ${result.gain >= 0 ? '#166534' : '#B91C1C'};">
-                            ${result.percentage >= 0 ? '+' : ''}${result.percentage.toFixed(1)}%
-                        </div>
-                    </div>
-                `;
-                
-                resultsList.appendChild(row);
-            });
-        }
-
-        // Navigation entre diapositives
-        function changeSlide(direction) {
-            const newSlide = currentSlide + direction;
-            if (newSlide >= 1 && newSlide <= 10) {
-                document.getElementById(`slide${currentSlide}`).classList.remove('active');
-                currentSlide = newSlide;
-                document.getElementById(`slide${currentSlide}`).classList.add('active');
-                updateNavigation();
-            }
-        }
-
-        function updateNavigation() {
-            document.getElementById('prevBtn').disabled = currentSlide === 1;
-            document.getElementById('nextBtn').disabled = currentSlide === 10;
-            document.getElementById('slideIndicator').textContent = `${currentSlide} / 10`;
-        }
-
-        // Navigation au clavier
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft') changeSlide(-1);
-            if (e.key === 'ArrowRight') changeSlide(1);
-            if (e.key === 'Escape') closeModal();
-        });
-
-        // Fermer le modal en cliquant à l'extérieur
-        document.getElementById('company-modal').addEventListener('click', (e) => {
-            if (e.target === e.currentTarget) {
-                closeModal();
-            }
-        });
-    </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9bab3bdb131499a5',t:'MTc2Nzg3MDQ3My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+  document.addEventListener("DOMContentLoaded", () => {
+    loadInvestments();
+    buildDots();
+    buildFloaters();
+    generateInvestmentForms();
+    generateCompanyCards();
+    updateSlideCounter();
+  });
+</script>
+</body>
 </html>
