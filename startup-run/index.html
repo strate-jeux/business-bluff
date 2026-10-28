@@ -1,0 +1,2454 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>STARTUP RUN</title>
+<style>
+/* =========================================================
+   STARTUP RUN — by STRATÉJEUX
+   All colours are CSS variables. Edit them here.
+   ========================================================= */
+:root {
+  --blue: #2556F5;          /* STRATÉJEUX royal blue */
+  --blue-light: #3D6BFF;
+  --blue-dark: #173CC0;
+  --blue-deep: #0F2A8F;
+  --navy: #0B1E5B;
+  --accent: #FFD43B;        /* TODO: replace with the exact STRATÉJEUX yellow */
+  --coral: #FF6B5B;
+  --alert: #FF4D5E;
+  --white: #FFFFFF;
+  --sky: #8DB8FF;
+  --green: #2EC27E;
+  --green-dark: #178A55;
+  --skin: #F5C29B;
+  --brown: #9A6235;
+  --grey: #A9B4C8;
+  --orange: #FF8A2B;
+  --pink: #FF9EC2;
+  --purple: #8E5BE8;
+  --teal: #12A4C4;
+  --red: #E8453C;
+  --gold: #F2B705;
+  --charcoal: #3A3F58;
+  --magenta: #E0529C;
+  --soft: #F2F5FF;
+  --line: #D5DEF5;
+  --muted: #6B7AA6;
+
+  /* card types */
+  --theme: #5B9BFF;      --theme-tint: #E2EDFF;
+  --target: #FFD43B;     --target-tint: #FFF5CC;
+  --constraint: #FF6B5B; --constraint-tint: #FFE4E0;
+
+  /* avatar backgrounds */
+  --av-bg1: #D6E6FF; --av-bg2: #FFF0B3; --av-bg3: #CDEFD9; --av-bg4: #FFD6E4;
+  --av-bg5: #FFE3C7; --av-bg6: #CFF3F8; --av-bg7: #FFE680; --av-bg8: #D9F7E6;
+
+  --panel: rgba(255, 255, 255, .10);
+  --panel-line: rgba(255, 255, 255, .22);
+  --panel-dark: rgba(11, 30, 91, .45);
+  --shadow: 0 .5rem 1.5rem rgba(6, 18, 70, .35);
+  --font: "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* 1rem = 24px at 1920x1080, ~17px at 1366x768: the whole app scales like a slide */
+html { font-size: clamp(12px, min(1.25vw, 2.222vh), 40px); }
+* { box-sizing: border-box; }
+body {
+  margin: 0; height: 100vh; overflow: hidden;
+  font-family: var(--font); color: var(--white);
+  background: radial-gradient(circle at 15% 0%, var(--blue-light) 0%, var(--blue) 45%, var(--blue-dark) 100%);
+  -webkit-font-smoothing: antialiased;
+}
+button, input, select { font-family: inherit; }
+svg text { font-family: var(--font); }
+h1, h2, h3, p { margin: 0; }
+
+/* ---------- SVG palette classes (used by every illustration) ---------- */
+.fb { fill: var(--blue); }   .fy { fill: var(--accent); } .fc { fill: var(--coral); }
+.fn { fill: var(--navy); }   .fw { fill: var(--white); }  .fg { fill: var(--green); }
+.fd { fill: var(--green-dark); } .fs { fill: var(--skin); } .fk { fill: var(--brown); }
+.fl { fill: var(--sky); }    .fp { fill: var(--pink); }   .fo { fill: var(--orange); }
+.fe { fill: var(--grey); }   .fv { fill: var(--purple); } .fr { fill: var(--red); }
+.ft { fill: var(--teal); }   .fm { fill: var(--magenta); } .fh { fill: var(--charcoal); }
+.fq { fill: var(--gold); }
+.ln { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.kb { stroke: var(--blue); } .ky { stroke: var(--accent); } .kc { stroke: var(--coral); }
+.kn { stroke: var(--navy); } .kw { stroke: var(--white); }  .kg { stroke: var(--green); }
+.kk { stroke: var(--brown); } .ke { stroke: var(--grey); }  .ko { stroke: var(--orange); }
+.kp { stroke: var(--pink); }
+
+/* ---------- App frame ---------- */
+#app { display: grid; grid-template-rows: auto 1fr; height: 100vh; }
+main { position: relative; min-height: 0; overflow: hidden; }
+.screen { height: 100%; padding: .9rem 1.2rem 1rem; min-height: 0; }
+
+.topbar {
+  height: 3.6rem; display: flex; align-items: center; gap: 1rem; padding: 0 1rem;
+  background: rgba(11, 30, 91, .35); border-bottom: 1px solid var(--panel-line);
+}
+.brand { display: flex; align-items: center; gap: .5rem; font-weight: 900; font-size: 1.1rem; letter-spacing: .04em; white-space: nowrap; }
+.brand svg { width: 1.6rem; height: 2.2rem; }
+.brand span { color: var(--accent); }
+body[data-step="setup"] .brand { visibility: hidden; }
+.steps { flex: 1; display: flex; justify-content: center; align-items: center; gap: .3rem; }
+.step {
+  display: flex; align-items: center; gap: .45rem; border: 0; cursor: pointer;
+  padding: .3rem .9rem .3rem .35rem; border-radius: 999px; font-weight: 900; font-size: .85rem; letter-spacing: .05em;
+  background: rgba(255, 255, 255, .12); color: var(--white);
+}
+.step .num { width: 1.6rem; height: 1.6rem; border-radius: 50%; display: grid; place-items: center; background: rgba(255,255,255,.2); }
+.step.done { background: rgba(255, 255, 255, .24); }
+.step.current { background: var(--accent); color: var(--navy); box-shadow: 0 0 0 .2rem rgba(255, 212, 59, .3); }
+.step.current .num { background: var(--navy); color: var(--accent); }
+.step.locked { opacity: .38; cursor: not-allowed; }
+.step-arrow { width: 1rem; height: 1rem; opacity: .6; }
+.step-arrow svg { width: 100%; height: 100%; display: block; }
+.tools { display: flex; gap: .4rem; }
+.iconbtn {
+  width: 2.5rem; height: 2.5rem; border-radius: 50%; border: 0; cursor: pointer; display: grid; place-items: center;
+  background: rgba(255, 255, 255, .16); color: var(--white); font-weight: 900; font-size: 1.1rem;
+}
+.iconbtn:hover { background: rgba(255, 255, 255, .28); }
+.iconbtn svg { width: 1.3rem; height: 1.3rem; }
+.iconbtn.off { background: var(--alert); }
+
+/* ---------- Buttons ---------- */
+.btn {
+  border: 0; cursor: pointer; font-weight: 900; font-size: 1rem; letter-spacing: .02em;
+  padding: .6rem 1.2rem; border-radius: .8rem; background: var(--white); color: var(--navy);
+  box-shadow: 0 .25rem 0 rgba(6, 18, 70, .3); transition: transform .08s, filter .15s;
+  display: inline-flex; align-items: center; justify-content: center; gap: .4rem; white-space: nowrap;
+}
+.btn:hover { filter: brightness(1.06); }
+.btn:active { transform: translateY(.15rem); box-shadow: 0 .1rem 0 rgba(6, 18, 70, .3); }
+.btn svg { width: 1.2em; height: 1.2em; }
+.btn.accent { background: var(--accent); color: var(--navy); }
+.btn.blue { background: var(--blue); color: var(--white); }
+.btn.ghost { background: rgba(255, 255, 255, .16); color: var(--white); box-shadow: none; }
+.btn.coral { background: var(--coral); color: var(--white); }
+.btn.big { font-size: 1.25rem; padding: .75rem 1.5rem; }
+.btn.mega { font-size: 1.7rem; padding: .9rem 2.2rem; border-radius: 1.1rem; box-shadow: 0 .35rem 0 rgba(6, 18, 70, .35); }
+.btn[disabled] { opacity: .45; cursor: not-allowed; filter: grayscale(.4); }
+.btn.pulse { animation: btnPulse 1.4s ease-in-out infinite; }
+@keyframes btnPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
+.avatar { display: inline-block; flex: none; border-radius: 50%; }
+.avatar svg { width: 100%; height: 100%; display: block; }
+.scene svg { width: 100%; height: 100%; display: block; }
+
+/* ---------- Setup ---------- */
+.setup { display: grid; grid-template-columns: 1fr 1.2fr; gap: 2rem; align-items: center; padding: .8rem 2.2rem; }
+.hero { text-align: center; display: flex; flex-direction: column; align-items: center; }
+.hero .scene { width: 24rem; height: 18rem; }
+.title { font-size: 5.4rem; font-weight: 900; letter-spacing: .02em; line-height: .95; text-shadow: 0 .4rem 0 var(--navy); }
+.title span { color: var(--accent); }
+.subtitle { font-size: 1.7rem; font-weight: 800; margin-top: .6rem; }
+.credit { font-size: .85rem; margin-top: .8rem; opacity: .8; letter-spacing: .2em; font-weight: 700; }
+.setup-panel { background: var(--white); color: var(--navy); border-radius: 1.4rem; padding: 1.1rem 1.6rem; box-shadow: var(--shadow); }
+.setup-panel h2 { font-size: 1.5rem; font-weight: 900; margin-bottom: .6rem; }
+.field { margin-bottom: .8rem; }
+.field-label { display: block; font-weight: 900; font-size: .85rem; text-transform: uppercase; letter-spacing: .08em; color: var(--blue); margin-bottom: .35rem; }
+.seg { display: flex; gap: .4rem; flex-wrap: wrap; align-items: center; }
+.seg button {
+  min-width: 3rem; padding: .4rem .8rem; border-radius: .7rem; border: 2px solid var(--line);
+  background: var(--soft); color: var(--navy); font-weight: 800; font-size: 1rem; cursor: pointer;
+}
+.seg button.on { background: var(--blue); color: var(--white); border-color: var(--blue); }
+.seg .custom { display: flex; align-items: center; gap: .3rem; font-weight: 700; margin-left: .4rem; }
+.seg .custom input { width: 4.2rem; }
+.seg .custom.on input { border-color: var(--blue); background: var(--soft); }
+.text-input {
+  font-size: 1rem; padding: .35rem .6rem; border-radius: .6rem; border: 2px solid var(--line);
+  color: var(--navy); font-weight: 700; background: var(--white); min-width: 0;
+}
+.text-input:focus { outline: none; border-color: var(--blue); }
+.names { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem .8rem; }
+.name-row { display: flex; align-items: center; gap: .5rem; }
+.name-row .avatar { width: 2.3rem; height: 2.3rem; }
+.name-row input { flex: 1; }
+.setup-panel .btn.mega { width: 100%; margin-top: .3rem; }
+
+/* ---------- Resume ---------- */
+.resume { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 1rem; }
+.resume .mascot-big { width: 9rem; height: 12rem; animation: bob 1.8s ease-in-out infinite; }
+.resume h1 { font-size: 3.6rem; font-weight: 900; text-shadow: 0 .3rem 0 var(--navy); }
+.resume p { font-size: 1.2rem; opacity: .9; }
+.resume .row { display: flex; gap: 1rem; margin-top: .5rem; }
+
+/* ---------- Screen heads ---------- */
+.screen-head { display: flex; align-items: center; gap: 1rem; margin-bottom: .6rem; }
+.screen-head .scene { width: 7.5rem; height: 5rem; flex: none; }
+.screen-head h2 { font-size: 1.7rem; font-weight: 900; }
+.screen-head p { font-size: 1rem; opacity: .9; }
+.screen-head .grow { flex: 1; min-width: 0; }
+.head-actions { display: flex; gap: .6rem; align-items: center; }
+
+/* ---------- Cards ---------- */
+.t-theme { --tc: var(--theme); --tt: var(--theme-tint); }
+.t-target { --tc: var(--target); --tt: var(--target-tint); }
+.t-constraint { --tc: var(--constraint); --tt: var(--constraint-tint); }
+.cards-row {
+  flex: 1; min-height: 0; display: flex; gap: 3%; justify-content: center; align-items: center;
+  container-type: size;
+}
+.card {
+  position: relative; flex: none; cursor: pointer; perspective: 1200px;
+  width: min(31cqw, 75cqh); height: min(100cqh, 46.5cqw);
+  container-type: inline-size;
+}
+.card-inner {
+  position: absolute; inset: 0; transform-style: preserve-3d;
+  transition: transform .65s cubic-bezier(.3, 1.35, .5, 1);
+}
+.card.revealed .card-inner { transform: rotateY(180deg); }
+.card-face {
+  position: absolute; inset: 0; border-radius: 8cqw; overflow: hidden;
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  border: 3cqw solid var(--tc); box-shadow: 0 .3rem .8rem rgba(6, 18, 70, .35);
+}
+.card-back {
+  background: linear-gradient(160deg, var(--navy), var(--blue-deep));
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2cqw;
+}
+.card:not(.revealed):hover .card-back { filter: brightness(1.2); }
+.back-art { width: 72%; max-height: 72%; }
+.back-art svg { width: 100%; height: 100%; display: block; }
+.back-label { color: var(--tc); font-weight: 900; letter-spacing: .1em; font-size: clamp(8px, 10cqw, 2rem); }
+.slot {
+  display: none; position: absolute; left: 6%; right: 6%; top: 28%; bottom: 28%;
+  background: var(--white); color: var(--navy); border-radius: 5cqw; box-shadow: inset 0 0 0 2cqw var(--tc);
+  align-items: center; justify-content: center; text-align: center; padding: 3cqw;
+  font-weight: 900; line-height: 1.1; font-size: clamp(9px, 11cqw, 2.6rem);
+}
+.card.rolling .slot { display: flex; }
+.card.rolling .back-art { opacity: .25; }
+.card.rolling .card-inner { animation: shake .12s linear infinite; }
+@keyframes shake { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-1.5%); } }
+.card-front { transform: rotateY(180deg); background: var(--white); display: flex; flex-direction: column; }
+.card-front .art { flex: 0 0 50%; background: var(--tt); display: flex; align-items: center; justify-content: center; padding: 3cqw; }
+.card-front .art svg { width: 100%; height: 100%; display: block; }
+.card-front .txt {
+  flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 2cqw 5cqw 4cqw; color: var(--navy);
+}
+.ctype {
+  font-size: clamp(7px, 7.5cqw, 1.2rem); font-weight: 900; letter-spacing: .1em;
+  background: var(--tc); color: var(--navy); border-radius: 999px; padding: .6cqw 4cqw; margin-bottom: 3cqw;
+}
+.cname { font-size: clamp(9px, 12cqw, 3rem); font-weight: 900; line-height: 1.08; }
+.reroll {
+  position: absolute; z-index: 5; top: -.55rem; right: -.55rem; transform: translateZ(2px);
+  width: 2.1rem; height: 2.1rem; border-radius: 50%; border: .18rem solid var(--navy);
+  background: var(--accent); color: var(--navy); cursor: pointer; display: grid; place-items: center; padding: 0;
+  box-shadow: 0 .2rem .4rem rgba(0, 0, 0, .3);
+}
+.reroll svg { width: 1.2rem; height: 1.2rem; }
+.reroll:hover { transform: translateZ(2px) rotate(-30deg); }
+
+/* ---------- Draw ---------- */
+.draw { display: flex; flex-direction: column; }
+.team-grid {
+  flex: 1; min-height: 0; display: grid; gap: .7rem;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); grid-template-rows: repeat(var(--rows), minmax(0, 1fr));
+}
+.team-panel {
+  min-height: 0; min-width: 0; display: flex; flex-direction: column; padding: .45rem .6rem .35rem;
+  background: var(--panel); border: .15rem solid var(--panel-line); border-radius: 1rem; transition: border-color .3s, box-shadow .3s;
+}
+.team-panel.ready { border-color: var(--accent); box-shadow: 0 0 0 .2rem rgba(255, 212, 59, .3); }
+.tp-head { display: flex; align-items: center; gap: .5rem; cursor: pointer; min-width: 0; }
+.tp-head .avatar { width: 2.3rem; height: 2.3rem; }
+.tp-name { flex: 1; min-width: 0; font-weight: 900; font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.badge-ready {
+  background: var(--accent); color: var(--navy); font-weight: 900; font-size: .75rem; letter-spacing: .08em;
+  padding: .15rem .55rem; border-radius: 999px; animation: popIn .5s cubic-bezier(.3, 1.6, .5, 1);
+}
+.zoom-btn { width: 2rem; height: 2rem; }
+.zoom-btn svg { width: 1.1rem; height: 1.1rem; }
+.team-panel .cards-row { margin: .45rem 0 .35rem; }
+/* 5 to 8 teams: narrower panels, so cards may be taller than 2:3 to keep the text readable */
+.team-grid.dense .cards-row { gap: 2.5%; }
+.team-grid.dense .card { width: 31.5cqw; height: min(100cqh, 60cqw); }
+.team-grid.dense .card-front .art { flex-basis: 44%; }
+.team-grid.dense .cname { font-size: clamp(10px, 13.5cqw, 3rem); }
+.cname.long, .team-grid.dense .cname.long { font-size: clamp(8px, 10cqw, 2.4rem); }
+.tp-foot { font-size: .75rem; text-align: center; font-weight: 700; opacity: .85; }
+@keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+
+/* ---------- Timers ---------- */
+.timer { text-align: center; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; }
+.timer .digits { font-size: var(--tsize, 9rem); text-shadow: 0 .35rem 0 rgba(6, 18, 70, .35); transition: color .3s; white-space: nowrap; }
+.timer.warn .digits { color: var(--accent); }
+.timer.danger .digits { color: var(--alert); animation: pulse 1s ease-in-out infinite; }
+.timer.done .digits { color: var(--accent); font-size: calc(var(--tsize, 9rem) * .5); animation: flash .5s ease-in-out 6; }
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+@keyframes flash { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .4; transform: scale(1.06); } }
+.timer-controls { display: flex; gap: .5rem; justify-content: center; flex-wrap: wrap; margin-top: .8rem; }
+.timer-controls .btn.main { min-width: 9rem; }
+.timer-label { font-size: 1.05rem; font-weight: 900; letter-spacing: .14em; color: var(--accent); margin-bottom: .3rem; }
+
+/* ---------- Build ---------- */
+.build { display: grid; grid-template-rows: minmax(0, 1fr) var(--recap-h); gap: .7rem; }
+.build-top { display: grid; grid-template-columns: 1.3fr 1fr; gap: .8rem; min-height: 0; }
+.timer-panel {
+  display: grid; grid-template-columns: 11rem 1fr; align-items: center; gap: .5rem;
+  background: var(--panel-dark); border-radius: 1.2rem; padding: 1rem; min-height: 0;
+}
+.timer-panel .scene { width: 11rem; height: 11rem; }
+.side {
+  background: var(--white); color: var(--navy); border-radius: 1.2rem; padding: .8rem 1rem;
+  display: flex; flex-direction: column; gap: .45rem; min-height: 0; overflow: hidden;
+}
+.side h3 { font-size: .85rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; color: var(--blue); }
+.posters { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
+.poster { display: flex; align-items: center; gap: .5rem; background: var(--soft); border-radius: .8rem; padding: .4rem .5rem; font-size: .85rem; font-weight: 700; line-height: 1.2; }
+.poster svg { width: 2.8rem; height: 3.2rem; flex: none; }
+.poster b { display: block; font-size: .95rem; font-weight: 900; }
+.crit-mini { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .3rem; }
+.crit-mini li { display: flex; align-items: center; gap: .55rem; font-size: .8rem; line-height: 1.15; }
+.crit-mini li b { display: block; font-size: .95rem; }
+.crit-mini svg { width: 2.1rem; height: 2.1rem; flex: none; }
+.side-actions { margin-top: auto; display: flex; gap: .6rem; }
+.side-actions .btn { flex: 1; }
+.recap { display: grid; gap: .55rem; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); min-height: 0; }
+.recap-item {
+  background: var(--panel); border: .12rem solid var(--panel-line); border-radius: .9rem; padding: .35rem .5rem;
+  display: flex; flex-direction: column; gap: .25rem; min-height: 0; min-width: 0;
+}
+.recap-head { display: flex; align-items: center; gap: .4rem; font-weight: 900; font-size: .9rem; min-width: 0; }
+.recap-head .avatar { width: 1.6rem; height: 1.6rem; }
+.recap-head span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chips { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .2rem; container-type: size; }
+.chip {
+  flex: 1; min-height: 0; display: flex; align-items: center; gap: .4rem; background: var(--white); color: var(--navy);
+  border-radius: .5rem; border-left: .35rem solid var(--tc); overflow: hidden;
+}
+.chip-art { height: 100%; aspect-ratio: 3 / 2; background: var(--tt); flex: none; padding: 2%; }
+.chip-art svg { width: 100%; height: 100%; display: block; }
+.chip-name { font-weight: 800; font-size: clamp(10px, 15cqh, 1.15rem); line-height: 1.05; padding-right: .3rem; overflow: hidden; }
+
+/* ---------- Pitch order ---------- */
+.order { display: grid; grid-template-columns: 1fr 1.3fr; gap: 2rem; align-items: center; padding: 1rem 2rem; }
+.order-intro { display: flex; flex-direction: column; align-items: center; text-align: center; gap: .8rem; }
+.order-intro .scene { width: 20rem; height: 13rem; }
+.order-intro h2 { font-size: 3rem; font-weight: 900; text-shadow: 0 .3rem 0 var(--navy); }
+.order-intro p { font-size: 1.05rem; }
+.order-intro .row { display: flex; gap: .8rem; }
+.order-list { position: relative; height: calc(var(--n) * var(--row)); }
+.order-item {
+  position: absolute; left: 0; right: 0; top: calc(var(--pos) * var(--row)); height: calc(var(--row) - .4rem);
+  display: flex; align-items: center; gap: .8rem; padding: 0 .8rem; background: var(--white); color: var(--navy);
+  border-radius: .9rem; box-shadow: 0 .2rem .5rem rgba(6, 18, 70, .25); transition: top .25s ease;
+  touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab;
+}
+.order-item.dragging { transition: none; z-index: 5; cursor: grabbing; box-shadow: 0 .8rem 1.6rem rgba(6, 18, 70, .45); }
+.order-list.shuffling .order-item { transition: top .12s ease; }
+.order-item .pos { width: 2.3rem; height: 2.3rem; border-radius: 50%; background: var(--blue); color: var(--white); font-weight: 900; display: grid; place-items: center; flex: none; }
+.order-list.shuffling .pos { visibility: hidden; }
+.order-item .avatar { height: calc(var(--row) - 1.2rem); width: calc(var(--row) - 1.2rem); max-width: 3.2rem; max-height: 3.2rem; }
+.order-item .oname { flex: 1; font-weight: 900; font-size: 1.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.order-item .grip { width: 1.4rem; opacity: .4; flex: none; }
+.order-item .arrow { width: 2.2rem; height: 2.2rem; border-radius: .6rem; border: 0; background: var(--soft); color: var(--navy); cursor: pointer; display: grid; place-items: center; padding: 0; }
+.order-item .arrow svg { width: 1.1rem; height: 1.1rem; }
+.order-item .arrow[disabled] { opacity: .25; cursor: default; }
+
+/* ---------- Pitch ---------- */
+.pitch { display: grid; grid-template-columns: 1fr 1.05fr; gap: 1rem; }
+.pitch-left { background: var(--panel); border-radius: 1.2rem; padding: .8rem 1rem; display: flex; flex-direction: column; gap: .5rem; min-height: 0; }
+.stage-row { display: flex; align-items: center; gap: 1rem; }
+.stage-row .scene { width: 11rem; height: 7.3rem; flex: none; }
+.now { font-size: .95rem; font-weight: 900; letter-spacing: .16em; color: var(--accent); }
+.who { display: flex; align-items: center; gap: .7rem; min-width: 0; }
+.who .avatar { width: 4.2rem; height: 4.2rem; }
+.pname { font-size: 2.1rem; font-weight: 900; line-height: 1.05; overflow-wrap: anywhere; }
+.pteam { font-size: 1rem; opacity: .85; font-weight: 700; }
+.sname { display: flex; align-items: center; gap: .6rem; font-weight: 800; font-size: 1rem; }
+.sname input { flex: 1; font-size: 1.1rem; }
+.pitch-right {
+  background: var(--panel-dark); border-radius: 1.2rem; padding: 1rem; min-height: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .6rem;
+}
+.pitch-count { font-weight: 900; font-size: 1.2rem; background: rgba(255, 255, 255, .15); padding: .3rem 1rem; border-radius: 999px; }
+.pitch-actions { display: flex; gap: .6rem; flex-wrap: wrap; justify-content: center; margin-top: .4rem; }
+.order-strip { display: flex; gap: .45rem; flex-wrap: wrap; justify-content: center; margin-top: .4rem; }
+.strip-item {
+  position: relative; width: 3rem; height: 3rem; border-radius: 50%; border: .2rem solid transparent; padding: 0;
+  background: none; cursor: pointer; opacity: .6;
+}
+.strip-item .avatar { width: 100%; height: 100%; }
+.strip-item.current { border-color: var(--accent); opacity: 1; transform: scale(1.12); }
+.strip-item.scored { opacity: 1; }
+.strip-item .tick {
+  position: absolute; right: -.35rem; bottom: -.35rem; width: 1.3rem; height: 1.3rem; border-radius: 50%;
+  background: var(--green); color: var(--white); display: grid; place-items: center; font-size: .8rem; font-weight: 900;
+}
+.link-btn { background: none; border: 0; color: var(--white); text-decoration: underline; font-weight: 700; font-size: .85rem; cursor: pointer; opacity: .85; }
+
+/* ---------- Score (one team) ---------- */
+.score-team { display: flex; flex-direction: column; gap: .55rem; max-width: 74rem; margin: 0 auto; }
+.score-head { display: flex; align-items: center; gap: 1rem; }
+.score-head .scene { width: 8.5rem; height: 5.6rem; flex: none; }
+.score-head .avatar { width: 4rem; height: 4rem; }
+.score-head h2 { font-size: 2rem; font-weight: 900; line-height: 1.05; }
+.score-head p { font-size: 1rem; opacity: .85; font-weight: 700; }
+.crit-row {
+  display: grid; grid-template-columns: 4rem minmax(0, 1fr) 21rem 3rem 9.5rem; align-items: center; gap: 1rem;
+  background: var(--white); color: var(--navy); border-radius: 1rem; padding: .45rem 1rem;
+}
+.crit-icon svg { width: 4rem; height: 4rem; display: block; }
+.crit-text b { display: block; font-size: 1.35rem; font-weight: 900; }
+.crit-text span { font-size: .95rem; font-weight: 600; color: var(--muted); }
+.big-range {
+  -webkit-appearance: none; appearance: none; width: 100%; height: 1.3rem; border-radius: 1rem; margin: .8rem 0 .3rem;
+  background: linear-gradient(to right, var(--blue) calc(var(--val) * 20%), var(--line) calc(var(--val) * 20%));
+  outline: none; cursor: pointer; touch-action: none;
+}
+.big-range::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; width: 2.7rem; height: 2.7rem; border-radius: 50%;
+  background: var(--accent); border: .3rem solid var(--navy); box-shadow: 0 .2rem .4rem rgba(0, 0, 0, .3); cursor: grab;
+}
+.big-range::-moz-range-thumb {
+  width: 2.7rem; height: 2.7rem; border-radius: 50%; box-sizing: border-box;
+  background: var(--accent); border: .3rem solid var(--navy); box-shadow: 0 .2rem .4rem rgba(0, 0, 0, .3); cursor: grab;
+}
+.big-range::-moz-range-track { background: transparent; height: 1.3rem; }
+.big-range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 .3rem rgba(37, 86, 245, .4); }
+.ticks { display: flex; justify-content: space-between; padding: .25rem 1.05rem 0; font-weight: 800; font-size: .8rem; color: var(--muted); }
+.ticks span { width: .6rem; text-align: center; }
+.crit-val { font-size: 2.8rem; font-weight: 900; text-align: center; color: var(--blue); }
+.stars { display: flex; gap: .15rem; }
+.stars svg { width: 1.75rem; height: 1.75rem; }
+.star-shape { fill: var(--line); transition: fill .2s, transform .2s; transform-origin: center; transform-box: fill-box; }
+.star-shape.on { fill: var(--accent); stroke: var(--navy); stroke-width: 1.5; }
+.score-foot { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: .2rem; }
+.total { font-size: 1.6rem; font-weight: 900; }
+.total b { font-size: 3.4rem; color: var(--accent); margin: 0 .2rem; }
+
+/* ---------- Score sheet ---------- */
+.sheet { display: flex; flex-direction: column; }
+.sheet-wrap { flex: 1; min-height: 0; overflow: auto; }
+.sheet-table { width: 100%; border-collapse: separate; border-spacing: 0 .3rem; }
+.sheet-table th { font-size: .9rem; font-weight: 900; padding: 0 .4rem .2rem; vertical-align: bottom; }
+.sheet-table th svg { width: 2.4rem; height: 2.4rem; display: block; margin: 0 auto .15rem; background: var(--white); border-radius: 50%; padding: .25rem; }
+.sheet-table td { background: var(--white); color: var(--navy); padding: .25rem .6rem; text-align: center; }
+.sheet-table td:first-child { border-radius: .8rem 0 0 .8rem; text-align: left; }
+.sheet-table td:last-child { border-radius: 0 .8rem .8rem 0; width: 15rem; }
+.sheet-team { display: flex; align-items: center; gap: .6rem; }
+.sheet-team .avatar { width: 2.4rem; height: 2.4rem; }
+.sheet-team b { display: block; font-size: 1.05rem; }
+.sheet-team small { font-size: .75rem; color: var(--muted); font-weight: 700; }
+.score-sel {
+  font-size: 1.25rem; font-weight: 900; padding: .15rem .4rem; border-radius: .6rem; border: 2px solid var(--line);
+  background: var(--soft); color: var(--navy); cursor: pointer; min-width: 3.8rem;
+}
+.score-sel.empty { color: var(--muted); }
+.status-cell { display: flex; align-items: center; justify-content: flex-end; gap: .5rem; }
+.tag-missing { background: var(--coral); color: var(--white); font-weight: 900; font-size: .75rem; padding: .2rem .55rem; border-radius: 999px; white-space: nowrap; }
+.tag-ok { color: var(--green-dark); font-weight: 900; font-size: .85rem; }
+.sheet .btn.small, .btn.small { font-size: .85rem; padding: .35rem .8rem; }
+.hint { font-size: .85rem; opacity: .85; font-weight: 700; }
+
+/* ---------- Results ---------- */
+.results { display: grid; grid-template-columns: 1.45fr 1fr; gap: 1rem; }
+.ranking { display: flex; flex-direction: column; gap: .35rem; min-height: 0; }
+.ranking h2 { font-size: 1.7rem; font-weight: 900; margin-bottom: .2rem; }
+.rank-row {
+  flex: 1 1 0; min-height: 0; max-height: 4.8rem; display: grid; align-items: center; gap: .7rem;
+  grid-template-columns: 3.6rem 2.8rem minmax(0, 1fr) 14rem 5.6rem;
+  background: var(--white); color: var(--navy); border-radius: .9rem; padding: .2rem .8rem;
+}
+.rank-row.first { background: var(--accent); }
+.rank-pos { font-size: 1.5rem; font-weight: 900; line-height: 1; text-align: center; }
+.rank-pos small { display: block; font-size: .6rem; letter-spacing: .06em; }
+.rank-row .avatar { width: 2.8rem; height: 2.8rem; }
+.rank-name { min-width: 0; }
+.rank-name b { display: block; font-size: 1.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rank-name small { font-size: .75rem; font-weight: 700; color: var(--muted); }
+.rank-row.first .rank-name small { color: var(--navy); }
+.bars { display: grid; grid-template-columns: 1fr 1fr; gap: .15rem .5rem; }
+.bar { display: flex; align-items: center; gap: .25rem; }
+.bar svg { width: 1rem; height: 1rem; flex: none; }
+.bar .track { flex: 1; height: .5rem; border-radius: 1rem; background: rgba(11, 30, 91, .12); overflow: hidden; }
+.bar i { display: block; height: 100%; width: var(--w); background: var(--blue); border-radius: 1rem; transition: width .9s ease-out .2s; }
+.rank-total { font-size: 1.9rem; font-weight: 900; text-align: right; white-space: nowrap; }
+.rank-total small { font-size: .8rem; }
+.results.animating .rank-row { opacity: 0; transform: translateX(-2rem) scale(.96); }
+.results.animating .rank-row.show { opacity: 1; transform: none; transition: opacity .45s, transform .45s cubic-bezier(.3, 1.5, .5, 1); }
+.results.animating .rank-row .bar i { width: 0; }
+.results.animating .rank-row.show .bar i { width: var(--w); }
+.results-side { display: flex; flex-direction: column; min-height: 0; gap: .6rem; }
+.podium { flex: 1; min-height: 0; display: flex; align-items: flex-end; justify-content: center; gap: .5rem; }
+.pod-col { display: flex; flex-direction: column; align-items: center; width: 9rem; }
+.pod-avatars { display: flex; flex-wrap: wrap; justify-content: center; gap: .2rem; margin-bottom: .3rem; transition: opacity .5s .6s; }
+.pod-avatars .pa { display: flex; flex-direction: column; align-items: center; max-width: 8.5rem; }
+.pod-avatars .avatar { width: 3.4rem; height: 3.4rem; }
+.pod-col.many .pod-avatars .avatar { width: 2.4rem; height: 2.4rem; }
+.pod-avatars small { font-size: .7rem; font-weight: 800; text-align: center; line-height: 1.1; max-width: 8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pod-step {
+  width: 100%; border-radius: .8rem .8rem 0 0; display: flex; justify-content: center; padding-top: .4rem;
+  font-size: 2.8rem; font-weight: 900; color: var(--navy); transform-origin: bottom;
+  transition: transform .8s cubic-bezier(.3, 1.4, .5, 1);
+}
+.pod-1 .pod-step { height: 12rem; background: var(--accent); }
+.pod-2 .pod-step { height: 8.5rem; background: var(--white); }
+.pod-3 .pod-step { height: 6rem; background: var(--coral); color: var(--white); }
+.results.animating .pod-step { transform: scaleY(0); }
+.results.animating .pod-avatars { opacity: 0; }
+.results.animating .podium.up .pod-step { transform: scaleY(1); }
+.results.animating .podium.up .pod-avatars { opacity: 1; }
+.results-actions { display: flex; flex-direction: column; align-items: center; gap: .4rem; min-height: 4.2rem; }
+.results.animating .results-actions { visibility: hidden; }
+.tie-banner { background: var(--accent); color: var(--navy); font-weight: 900; padding: .3rem 1rem; border-radius: 999px; font-size: 1.1rem; }
+
+/* ---------- Final vote ---------- */
+.vote { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; text-align: center; }
+.vote h2 { font-size: 3rem; font-weight: 900; text-shadow: 0 .3rem 0 var(--navy); }
+.rule { background: var(--accent); color: var(--navy); font-weight: 900; font-size: 1.25rem; padding: .6rem 1.4rem; border-radius: 1rem; }
+.vote-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; }
+.vote-card {
+  width: 15rem; background: var(--white); color: var(--navy); border-radius: 1.2rem; padding: .9rem;
+  display: flex; flex-direction: column; align-items: center; gap: .35rem; transition: transform .4s, box-shadow .4s;
+}
+.vote-card .avatar { width: 4.6rem; height: 4.6rem; }
+.vc-name { font-size: 1.35rem; font-weight: 900; line-height: 1.1; }
+.vc-team { font-size: .85rem; font-weight: 700; color: var(--muted); }
+.vote-ctrl { display: flex; align-items: center; gap: .4rem; margin-top: .3rem; }
+.vote-ctrl button {
+  width: 3rem; height: 3rem; border-radius: 50%; border: 0; cursor: pointer; font-size: 1.8rem; font-weight: 900; line-height: 1;
+  background: var(--blue); color: var(--white);
+}
+.vote-ctrl input { width: 4.4rem; text-align: center; font-size: 1.6rem; font-weight: 900; padding: .25rem; }
+.vc-hidden { font-size: .75rem; font-weight: 800; color: var(--muted); letter-spacing: .06em; }
+.vc-count { font-size: 3.6rem; font-weight: 900; color: var(--blue); line-height: 1; animation: popIn .5s cubic-bezier(.3, 1.6, .5, 1); }
+.vc-count small { font-size: 1rem; }
+.vote-card.win { box-shadow: 0 0 0 .4rem var(--accent), var(--shadow); transform: scale(1.06); }
+.vote-card.lose { opacity: .65; }
+.vote-actions { display: flex; gap: .8rem; align-items: center; }
+
+/* ---------- Final ---------- */
+.final { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: .35rem; }
+.final-kicker { font-size: 3.4rem; font-weight: 900; letter-spacing: .08em; color: var(--accent); text-shadow: 0 .3rem 0 var(--navy); }
+.final .scene { width: 22rem; height: 14.5rem; }
+.final-name { font-size: 4rem; font-weight: 900; line-height: 1.05; text-shadow: 0 .35rem 0 var(--navy); animation: popIn .8s cubic-bezier(.3, 1.6, .5, 1); }
+.final-team { display: flex; align-items: center; gap: .6rem; font-size: 1.5rem; font-weight: 800; }
+.final-team .avatar { width: 3.4rem; height: 3.4rem; }
+.final-note { background: rgba(255, 255, 255, .16); border-radius: 999px; padding: .3rem 1.1rem; font-weight: 800; font-size: 1rem; }
+.final-actions { display: flex; gap: .8rem; margin-top: .6rem; }
+
+/* ---------- Modal ---------- */
+.modal-bg {
+  position: fixed; inset: 0; z-index: 50; background: rgba(5, 12, 40, .72);
+  display: flex; align-items: center; justify-content: center; animation: fadeIn .2s;
+}
+.modal {
+  position: relative; background: var(--white); color: var(--navy); border-radius: 1.4rem; padding: 1.3rem 1.8rem;
+  max-width: 92vw; max-height: 92vh; overflow: auto; box-shadow: var(--shadow); animation: popIn .3s cubic-bezier(.3, 1.4, .5, 1);
+}
+.modal.dark { background: var(--navy); color: var(--white); }
+.modal h2 { font-size: 1.8rem; font-weight: 900; margin-bottom: .7rem; padding-right: 2.5rem; }
+.modal .close { position: absolute; top: .8rem; right: .8rem; background: var(--soft); color: var(--navy); }
+.modal.dark .close { background: rgba(255, 255, 255, .15); color: var(--white); }
+.modal-actions { display: flex; gap: .8rem; justify-content: flex-end; margin-top: 1.2rem; }
+.confirm-text { font-size: 1.3rem; font-weight: 700; max-width: 34rem; }
+.zoom-head { display: flex; align-items: center; gap: .8rem; margin-bottom: .6rem; }
+.zoom-head .avatar { width: 3.6rem; height: 3.6rem; }
+.zoom-head h2 { margin: 0; }
+.zoom-cards { width: 74rem; max-width: 86vw; height: 31rem; max-height: 68vh; display: flex; }
+.zoom-foot { text-align: center; font-weight: 700; margin-top: .5rem; opacity: .85; }
+.toolkit { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
+.toolkit li { background: var(--soft); border-left: .4rem solid var(--blue); border-radius: .7rem; padding: .6rem .9rem; font-size: 1.25rem; font-weight: 800; }
+.keys { display: grid; grid-template-columns: auto 1fr; gap: .6rem 1.2rem; align-items: center; font-size: 1.2rem; font-weight: 700; }
+kbd { display: inline-block; min-width: 2.4rem; text-align: center; background: var(--soft); border: 2px solid var(--line); border-bottom-width: .25rem; border-radius: .5rem; padding: .15rem .6rem; font-family: var(--font); font-weight: 900; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ---------- Mascot & confetti ---------- */
+.mascot {
+  position: fixed; left: 1.2rem; bottom: .6rem; z-index: 60; display: flex; align-items: flex-end; gap: .3rem;
+  pointer-events: none; transform: translateY(130%); transition: transform .5s cubic-bezier(.3, 1.5, .5, 1);
+}
+.mascot.show { transform: none; }
+.mascot-art { width: 5.5rem; height: 7.7rem; animation: bob 1.6s ease-in-out infinite; }
+.mascot-art svg, .mascot-big svg { width: 100%; height: 100%; display: block; }
+.bubble {
+  background: var(--white); color: var(--navy); font-weight: 900; font-size: 1.7rem; padding: .55rem 1.2rem;
+  border-radius: 1.2rem 1.2rem 1.2rem .2rem; margin-bottom: 5.2rem; box-shadow: var(--shadow); white-space: nowrap;
+}
+@keyframes bob { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-.5rem) rotate(3deg); } }
+#confetti { position: fixed; inset: 0; z-index: 70; pointer-events: none; width: 100vw; height: 100vh; }
+
+/* ---------- Scene animations ---------- */
+.float { animation: floatY 3s ease-in-out infinite; }
+@keyframes floatY { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.flame { transform-box: fill-box; transform-origin: 50% 0; animation: flame .18s ease-in-out infinite alternate; }
+@keyframes flame { from { transform: scaleY(1) scaleX(1); } to { transform: scaleY(1.25) scaleX(.9); } }
+.spin { transform-box: fill-box; transform-origin: center; animation: spin 8s linear infinite; }
+.spin-rev { transform-box: fill-box; transform-origin: center; animation: spin 6s linear infinite reverse; }
+.spin-slow { transform-box: fill-box; transform-origin: center; animation: spin 20s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.twinkle { transform-box: fill-box; transform-origin: center; animation: twinkle 1.8s ease-in-out infinite; }
+.twinkle.d2 { animation-delay: .6s; } .twinkle.d3 { animation-delay: 1.2s; }
+@keyframes twinkle { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .3; transform: scale(.6); } }
+.beam { animation: beam 2.4s ease-in-out infinite alternate; }
+@keyframes beam { from { opacity: .25; } to { opacity: .5; } }
+.glow { animation: glow 1.6s ease-in-out infinite alternate; }
+@keyframes glow { from { opacity: .4; } to { opacity: 1; } }
+
+/* ---------- Small screens (1366x768 and below) ---------- */
+@media (max-aspect-ratio: 4/3) {
+  .setup { grid-template-columns: 1fr; overflow: auto; }
+  .hero .scene { height: 10rem; }
+}
+</style>
+</head>
+<body data-step="setup">
+<div id="app">
+  <header class="topbar" id="topbar"></header>
+  <main id="main"></main>
+</div>
+<div id="modal-root"></div>
+<div class="mascot" id="mascot"><div class="mascot-art" id="mascot-art"></div><div class="bubble" id="mascot-bubble"></div></div>
+<canvas id="confetti"></canvas>
+
+<script>
+'use strict';
+
+/* =====================================================================
+   EDITABLE DATA
+   - CRITERIA: the 4 scoring criteria (name, question, icon)
+   - CARDS: themes, targets and constraints (name + illustration)
+   Illustrations are inline SVG (viewBox 0 0 150 100) using the palette
+   classes defined in the CSS (fb = blue fill, kn = navy stroke, ...).
+   ===================================================================== */
+
+// Small drawing helpers used by the card illustrations
+const star = (cx, cy, r, cls) => {
+  let d = '';
+  for (let i = 0; i < 10; i++) {
+    const a = -Math.PI / 2 + i * Math.PI / 5;
+    const rr = i % 2 ? r * 0.45 : r;
+    d += (i ? 'L' : 'M') + (cx + rr * Math.cos(a)).toFixed(1) + ' ' + (cy + rr * Math.sin(a)).toFixed(1);
+  }
+  return `<path class="${cls}" d="${d}Z"/>`;
+};
+const heart = (cx, cy, s, cls) =>
+  `<path class="${cls}" transform="translate(${cx} ${cy}) scale(${s})" d="M0 9L-9 0A5 5 0 0 1 0 -6A5 5 0 0 1 9 0Z"/>`;
+// A simple person: head centre near (0,6), shoulders down to y=52
+const fig = (x, y, s, body, hair, extra = '') =>
+  `<g transform="translate(${x} ${y}) scale(${s})"><path class="${body}" d="M-18 52Q-18 21 0 21Q18 21 18 52Z"/>` +
+  `<circle class="fs" cx="0" cy="6" r="13"/><path class="${hair}" d="M-13.5 5A13.5 13.5 0 0 1 13.5 5Q7 -1 0 1Q-7 -1 -13.5 5Z"/>` +
+  `<circle class="fn" cx="-4.5" cy="8" r="1.8"/><circle class="fn" cx="4.5" cy="8" r="1.8"/>${extra}</g>`;
+const txt = (x, y, size, cls, s) =>
+  `<text x="${x}" y="${y}" text-anchor="middle" font-size="${size}" font-weight="900" class="${cls}">${s}</text>`;
+
+const CRITERIA = [
+  {
+    name: 'Creativity',
+    question: 'How new and surprising is the idea?',
+    icon: `<path class="ln kc" stroke-width="6" d="M50 5v9M17 17l7 7M83 17l-7 7M5 45h9M86 45h9"/>
+      <circle class="fy" cx="50" cy="44" r="25"/><rect class="fe" x="38" y="64" width="24" height="15" rx="3"/>
+      <rect class="fn" x="42" y="80" width="16" height="7" rx="3"/><path class="ln kn" stroke-width="3.5" d="M41 46l4.5 6 4.5-6 4.5 6 4.5-6"/>`
+  },
+  {
+    name: 'Card Challenge',
+    question: 'Does the startup really use its theme, target and constraint?',
+    icon: `<g transform="rotate(-18 50 80)"><rect class="fl kn" stroke-width="3" x="30" y="20" width="36" height="52" rx="6"/></g>
+      <rect class="fy kn" stroke-width="3" x="32" y="16" width="36" height="52" rx="6"/>
+      <g transform="rotate(18 50 80)"><rect class="fc kn" stroke-width="3" x="34" y="20" width="36" height="52" rx="6"/></g>
+      ${star(52, 44, 11, 'fw')}`
+  },
+  {
+    name: 'Business Potential',
+    question: 'Can it find customers and make money?',
+    icon: `<rect class="fb" x="12" y="62" width="14" height="26" rx="2"/><rect class="fb" x="32" y="48" width="14" height="40" rx="2"/>
+      <rect class="fb" x="52" y="34" width="14" height="54" rx="2"/>
+      <path class="ln kc" stroke-width="6" d="M12 50l22-16 14 8 26-24"/><path class="fc" d="M80 10l2 18-16-6z"/>
+      <circle class="fy kn" stroke-width="3" cx="78" cy="72" r="15"/>${txt(78, 79, 19, 'fn', '€')}`
+  },
+  {
+    name: 'Pitch Power',
+    question: 'Is the pitch clear, convincing and well presented in English?',
+    icon: `<path class="ln kn" stroke-width="5" d="M30 46q0 22 20 22t20-22M50 68v16M36 88h28"/>
+      <rect class="fe kn" stroke-width="3" x="38" y="10" width="24" height="44" rx="12"/>
+      <path class="ln kw" stroke-width="3" d="M42 24h16M42 32h16M42 40h16"/>
+      <path class="ln kc" stroke-width="5" d="M76 22q8 8 0 18M84 14q14 16 0 34"/>`
+  }
+];
+
+const CARDS = {
+  theme: [
+    { name: 'Food & drinks', art: `
+      <ellipse class="fn" cx="55" cy="86" rx="32" ry="5"/><path class="fb" d="M32 40h46l-6 44H38z"/>
+      <path class="ln kb" stroke-width="7" d="M78 50q14 2 10 16q-3 8-12 8"/>
+      <path class="ln kn" stroke-width="4" d="M46 32q-5-7 0-14M62 32q-5-7 0-14"/><rect class="fw" x="40" y="54" width="30" height="5" rx="2"/>
+      <path class="fo" d="M92 82Q94 44 118 44Q142 44 144 82Q136 88 130 80Q128 62 118 62Q108 62 106 80Q100 88 92 82Z"/>
+      <path class="ln kk" stroke-width="3" d="M106 50l5 13M130 50l-5 13M118 45v16"/>` },
+    { name: 'Sport & fitness', art: `
+      <g transform="rotate(-20 60 55)"><rect class="fn" x="26" y="51" width="68" height="8" rx="4"/>
+      <rect class="fc" x="22" y="33" width="12" height="44" rx="4"/><rect class="fc" x="86" y="33" width="12" height="44" rx="4"/>
+      <rect class="fb" x="13" y="40" width="10" height="30" rx="3"/><rect class="fb" x="97" y="40" width="10" height="30" rx="3"/></g>
+      <circle class="fw kn" stroke-width="3" cx="120" cy="70" r="20"/><path class="fn" d="M120 61l8 6-3 9h-10l-3-9z"/>
+      <path class="ln kn" stroke-width="3" d="M120 61v-10M128 67l9-4M125 76l6 9M115 76l-6 9M112 67l-9-4"/>` },
+    { name: 'Travel & tourism', art: `
+      <path class="ln kn" stroke-width="5" d="M50 38v-10h20v10"/><rect class="fc" x="34" y="36" width="52" height="50" rx="8"/>
+      <rect class="fy" x="46" y="36" width="7" height="50"/><rect class="fy" x="67" y="36" width="7" height="50"/>
+      <circle class="fn" cx="44" cy="90" r="4"/><circle class="fn" cx="76" cy="90" r="4"/>
+      <g transform="translate(116 34) rotate(-25)"><path class="fb" d="M-26 0q0-6 6-6h36q9 0 12 6q-3 6-12 6h-36q-6 0-6-6z"/>
+      <path class="fb" d="M-4-4l-12-18h8l18 18zM-4 4l-12 18h8l18-18zM-22-3l-7-10h6l8 10z"/></g>` },
+    { name: 'Fashion & clothing', art: `
+      <path class="ln kn" stroke-width="4" d="M75 30v-7a6 6 0 1 0-6-6"/><path class="ln kn" stroke-width="4" d="M75 30L42 44M75 30l33 14"/>
+      <path class="fc" d="M52 40L28 52L36 68L46 63V94H104V63L114 68L122 52L98 40Q75 56 52 40Z"/>
+      ${star(75, 72, 10, 'fy')}` },
+    { name: 'Education & learning', art: `
+      <path class="fw" d="M20 58q25-8 55 4v32q-30-12-55-4z"/><path class="fw" d="M130 58q-25-8-55 4v32q30-12 55-4z"/>
+      <path class="ln kn" stroke-width="3" d="M20 58q25-8 55 4q30-12 55-4v32q-25-8-55 4q-30-12-55-4zM75 62v32"/>
+      <path class="fn" d="M75 8l40 14-40 14-40-14z"/><path class="fn" d="M54 28v12q21 10 42 0V28l-21 8z"/>
+      <path class="ln ky" stroke-width="3" d="M110 24v14"/><circle class="fy" cx="110" cy="41" r="4"/>` },
+    { name: 'Video games & entertainment', art: `
+      <path class="fn" d="M46 28h58q24 0 28 32q4 30-13 30q-10 0-19-16H50q-9 16-19 16q-17 0-13-30q4-32 28-32z"/>
+      <path class="fw" d="M42 44h9v9h9v9h-9v9h-9v-9h-9v-9h9z"/>
+      <circle class="fy" cx="104" cy="46" r="6"/><circle class="fc" cx="116" cy="58" r="6"/>
+      <circle class="fl" cx="92" cy="58" r="6"/><circle class="fg" cx="104" cy="70" r="6"/>` },
+    { name: 'Pets', art: `
+      <ellipse class="fn" cx="58" cy="68" rx="19" ry="16"/><ellipse class="fn" cx="34" cy="46" rx="7" ry="9"/>
+      <ellipse class="fn" cx="48" cy="32" rx="7" ry="9"/><ellipse class="fn" cx="68" cy="32" rx="7" ry="9"/>
+      <ellipse class="fn" cx="82" cy="46" rx="7" ry="9"/>
+      <g transform="rotate(-30 114 62)"><rect class="fy" x="98" y="56" width="32" height="12" rx="4"/>
+      <circle class="fy" cx="98" cy="56" r="7"/><circle class="fy" cx="98" cy="68" r="7"/>
+      <circle class="fy" cx="130" cy="56" r="7"/><circle class="fy" cx="130" cy="68" r="7"/></g>` },
+    { name: 'Home & housing', art: `
+      <rect class="fn" x="96" y="20" width="10" height="20"/><rect class="fy" x="42" y="46" width="66" height="44"/>
+      <path class="fc" d="M32 50L75 14l43 36z"/><rect class="fb" x="66" y="62" width="18" height="28" rx="2"/>
+      <rect class="fw" x="48" y="56" width="14" height="12"/><rect class="fw" x="88" y="56" width="14" height="12"/>
+      <rect class="fg" x="18" y="89" width="114" height="6" rx="3"/>` },
+    { name: 'Transport & mobility', art: `
+      <rect class="fy" x="24" y="24" width="102" height="56" rx="10"/>
+      <rect class="fb" x="32" y="32" width="22" height="20" rx="3"/><rect class="fb" x="60" y="32" width="22" height="20" rx="3"/>
+      <rect class="fb" x="88" y="32" width="30" height="20" rx="3"/><rect class="fn" x="24" y="60" width="102" height="6"/>
+      <circle class="fn" cx="48" cy="82" r="11"/><circle class="fe" cx="48" cy="82" r="4"/>
+      <circle class="fn" cx="104" cy="82" r="11"/><circle class="fe" cx="104" cy="82" r="4"/><circle class="fw" cx="120" cy="71" r="3.5"/>` },
+    { name: 'Health & wellbeing', art: `
+      <path class="fc" d="M75 94L34 54A23 23 0 0 1 75 26A23 23 0 0 1 116 54Z"/>
+      <path class="ln kw" stroke-width="5" d="M38 58h20l7-13 10 25 9-17 5 5h24"/>
+      <path class="fg" d="M118 8h9v9h9v9h-9v9h-9v-9h-9v-9h9z"/>` },
+    { name: 'Music & events', art: `
+      <rect class="fn" x="56" y="22" width="6" height="54"/><rect class="fn" x="100" y="13" width="6" height="54"/>
+      <path class="fn" d="M56 22l50-10v12l-50 10z"/>
+      <ellipse class="fb" cx="50" cy="77" rx="12" ry="9" transform="rotate(-20 50 77)"/>
+      <ellipse class="fb" cx="94" cy="68" rx="12" ry="9" transform="rotate(-20 94 68)"/>
+      ${star(26, 32, 9, 'fy')}${star(128, 84, 8, 'fc')}${star(130, 26, 6, 'fy')}` },
+    { name: 'Beauty & personal care', art: `
+      <rect class="fn" x="44" y="62" width="11" height="34" rx="5" transform="rotate(-18 49 79)"/>
+      <circle class="fn" cx="58" cy="40" r="27"/><circle class="fl" cx="58" cy="40" r="21"/>
+      <path class="ln kw" stroke-width="4" d="M45 35q4-11 15-13"/>
+      <rect class="fy" x="96" y="58" width="26" height="34" rx="3"/><rect class="fe" x="99" y="46" width="20" height="14"/>
+      <path class="fc" d="M101 48V26l16-9v31z"/>` },
+    { name: 'Recycling & environment', art: `
+      <path class="ln kb" stroke-width="9" d="M47 42A30 30 0 0 1 98 33"/><path class="fb" d="M106 42L90 39L104 26Z"/>
+      <path class="ln kb" stroke-width="9" d="M103 62A30 30 0 0 1 52 71"/><path class="fb" d="M44 62L60 65L46 78Z"/>
+      <path class="fg" d="M63 64q0-22 24-24q2 24-24 24z"/><path class="ln kw" stroke-width="3" d="M65 62l17-17"/>` },
+    { name: 'Money & banking', art: `
+      <path class="fn" d="M20 40L62 16l42 24z"/><rect class="fn" x="20" y="40" width="84" height="6"/>
+      <rect class="fw" x="27" y="48" width="11" height="36"/><rect class="fw" x="46" y="48" width="11" height="36"/>
+      <rect class="fw" x="66" y="48" width="11" height="36"/><rect class="fw" x="85" y="48" width="11" height="36"/>
+      <rect class="fn" x="16" y="84" width="92" height="8"/>
+      <ellipse class="fy kn" stroke-width="2.5" cx="128" cy="86" rx="15" ry="5.5"/><ellipse class="fy kn" stroke-width="2.5" cx="128" cy="78" rx="15" ry="5.5"/>
+      <ellipse class="fy kn" stroke-width="2.5" cx="128" cy="70" rx="15" ry="5.5"/><ellipse class="fy kn" stroke-width="2.5" cx="128" cy="62" rx="15" ry="5.5"/>` },
+    { name: 'Culture & art', art: `
+      <path class="fw kn" stroke-width="3" d="M70 16c30 0 52 18 52 38s-14 26-26 22-16 10-28 10C42 86 22 72 22 52S42 16 70 16z"/>
+      <circle class="fc" cx="46" cy="46" r="7"/><circle class="fb" cx="64" cy="32" r="7"/><circle class="fy" cx="86" cy="34" r="7"/>
+      <circle class="fg" cx="104" cy="50" r="7"/><circle class="fl" cx="54" cy="68" r="7"/>
+      <g transform="rotate(35 120 64)"><rect class="fk" x="116" y="48" width="8" height="42" rx="3"/>
+      <rect class="fe" x="116" y="40" width="8" height="9"/><path class="fn" d="M116 40q4-16 8 0z"/></g>` }
+  ],
+
+  target: [
+    { name: 'Teenagers (13–17)', art: fig(58, 16, 1.45, 'fb', 'fn',
+        `<path class="ln kc" stroke-width="4" d="M-15 6a15 15 0 0 1 30 0"/><rect class="fc" x="-19" y="1" width="7" height="13" rx="3"/><rect class="fc" x="12" y="1" width="7" height="13" rx="3"/>`) +
+      `<rect class="fn" x="98" y="38" width="28" height="48" rx="5"/><rect class="fl" x="101" y="43" width="22" height="34" rx="2"/>${heart(112, 60, 0.9, 'fc')}` },
+    { name: 'University students', art: fig(56, 22, 1.35, 'fc', 'fk',
+        `<path class="fn" d="M0-16l22 8-22 8-22-8z"/><path class="fn" d="M-12-10v6q12 5 24 0v-6z"/><path class="ln ky" stroke-width="2.5" d="M18-8v12"/>`) +
+      `<rect class="fb" x="96" y="74" width="40" height="11" rx="2"/><rect class="fy" x="100" y="63" width="34" height="11" rx="2"/>
+       <rect class="fg" x="94" y="52" width="38" height="11" rx="2"/>` },
+    { name: 'Young parents', art: fig(44, 20, 1.35, 'fg', 'fk') +
+      `<path class="fb" d="M90 52h44Q134 78 112 78Q90 78 90 52z"/><path class="fc" d="M90 52A22 22 0 0 1 112 30V52z"/>
+       <path class="ln kn" stroke-width="4" d="M134 52l8-16"/><circle class="fn" cx="99" cy="85" r="6"/><circle class="fn" cx="125" cy="85" r="6"/>` },
+    { name: 'Seniors (65+)', art: fig(62, 18, 1.45, 'fv', 'fe',
+        `<circle class="ln kn" stroke-width="1.8" cx="-4.5" cy="8" r="4"/><circle class="ln kn" stroke-width="1.8" cx="4.5" cy="8" r="4"/>
+         <path class="ln kn" stroke-width="1.5" d="M-4 14q4 3 8 0"/>`) +
+      `<path class="ln kk" stroke-width="6" d="M104 94V44Q104 34 113 34Q122 34 122 44"/>` },
+    { name: 'Busy professionals', art: fig(52, 18, 1.45, 'fn', 'fk',
+        `<path class="fw" d="M-7 21l7 7 7-7z"/><path class="fc" d="M0 26l-3.5 5 3.5 18 3.5-18z"/>`) +
+      `<circle class="fw kn" stroke-width="4" cx="118" cy="32" r="18"/><path class="ln kn" stroke-width="4" d="M118 22v10l7 5"/>
+       <rect class="fk" x="96" y="64" width="34" height="25" rx="3"/><path class="ln kk" stroke-width="4" d="M106 64v-5h14v5"/>` },
+    { name: 'Small local businesses', art: `
+      <rect class="fn" x="52" y="4" width="46" height="14" rx="3"/>${txt(75, 15, 10, 'fy', 'SHOP')}
+      <rect class="fw" x="30" y="38" width="90" height="56"/>
+      <rect class="fc" x="26" y="22" width="98" height="20" rx="3"/>
+      <rect class="fw" x="42" y="22" width="16" height="20"/><rect class="fw" x="74" y="22" width="16" height="20"/><rect class="fw" x="106" y="22" width="16" height="20"/>
+      <rect class="fb" x="38" y="56" width="22" height="38"/><rect class="fl" x="68" y="54" width="44" height="26"/>
+      <rect class="fn" x="76" y="60" width="28" height="12" rx="2"/>${txt(90, 69.5, 8.5, 'fy', 'OPEN')}` },
+    { name: 'Tourists', art: `
+      <circle class="fo" cx="24" cy="22" r="10"/>
+      <rect class="fn" x="50" y="30" width="22" height="12" rx="3"/><rect class="fn" x="32" y="38" width="76" height="50" rx="8"/>
+      <circle class="fe" cx="70" cy="63" r="18"/><circle class="fb" cx="70" cy="63" r="11"/><circle class="fw" cx="66" cy="59" r="3"/>
+      <rect class="fc" x="92" y="44" width="9" height="6" rx="2"/>
+      <path class="fc" d="M126 76c-10-14-14-20-14-27a14 14 0 0 1 28 0c0 7-4 13-14 27z"/><circle class="fw" cx="126" cy="49" r="5"/>` },
+    { name: 'Farmers', art: `
+      <rect class="fn" x="40" y="34" width="6" height="18"/><rect class="fg" x="26" y="50" width="76" height="24" rx="4"/>
+      <path class="fg" d="M70 50V20h32v30z"/><rect class="fl" x="76" y="26" width="20" height="16"/>
+      <circle class="fn" cx="88" cy="76" r="18"/><circle class="fy" cx="88" cy="76" r="7"/>
+      <circle class="fn" cx="38" cy="82" r="11"/><circle class="fy" cx="38" cy="82" r="4"/>
+      <path class="ln kk" stroke-width="3" d="M128 94V38"/>
+      <ellipse class="fo" cx="123" cy="46" rx="4" ry="6"/><ellipse class="fo" cx="133" cy="46" rx="4" ry="6"/>
+      <ellipse class="fo" cx="123" cy="58" rx="4" ry="6"/><ellipse class="fo" cx="133" cy="58" rx="4" ry="6"/><ellipse class="fo" cx="128" cy="36" rx="4" ry="6"/>` },
+    { name: 'Amateur athletes', art: `
+      <path class="fc" d="M22 82Q22 58 32 44Q42 50 52 44Q64 60 84 64Q116 70 122 82V86H22Z"/>
+      <rect class="fn" x="18" y="84" width="108" height="9" rx="4"/>
+      <path class="ln kw" stroke-width="4" d="M40 78Q72 76 96 66"/><path class="ln kw" stroke-width="3" d="M50 52l8 6M58 50l8 6"/>
+      <path class="fb" d="M110 4h10l7 18-5 6zM144 4h-10l-7 18 5 6z"/>
+      <circle class="fy kn" stroke-width="3" cx="127" cy="36" r="13"/>${star(127, 36, 7, 'fn')}` },
+    { name: 'Gamers', art: `
+      <path class="ln kn" stroke-width="10" d="M42 66V52a33 33 0 0 1 66 0v14"/>
+      <rect class="fc" x="30" y="52" width="22" height="34" rx="9"/><rect class="fc" x="98" y="52" width="22" height="34" rx="9"/>
+      <path class="ln kn" stroke-width="4" d="M40 82q4 12 26 12"/><circle class="fb" cx="70" cy="93" r="5"/>
+      <path class="fb" d="M80 26L68 46h9L72 64L88 40h-9l5-14z"/>` },
+    { name: 'People living in the countryside', art: `
+      <circle class="fo" cx="120" cy="24" r="13"/>
+      <path class="fg" d="M0 78Q38 46 80 70Q114 50 150 72V100H0Z"/>
+      <rect class="fw" x="34" y="52" width="26" height="20"/><path class="fc" d="M30 54l17-15 17 15z"/><rect class="fk" x="43" y="61" width="8" height="11"/>
+      <rect class="fk" x="100" y="48" width="6" height="18"/><circle class="fd" cx="103" cy="42" r="12"/>` },
+    { name: 'People with disabilities', art: `
+      <circle class="fb" cx="62" cy="16" r="9"/>
+      <path class="ln kb" stroke-width="9" d="M60 31v27h26l9 24"/><path class="ln kb" stroke-width="7" d="M60 43h20"/>
+      <path class="ln kn" stroke-width="7" d="M44 52A24 24 0 1 0 80 82"/>
+      ${heart(118, 30, 1.6, 'fc')}` },
+    { name: 'Pet owners', art: fig(42, 16, 1.35, 'fg', 'fn') +
+      `<path class="ln kc" stroke-width="3" d="M64 70q30 10 58-8"/>
+       <path class="ln kk" stroke-width="4" d="M94 68q-8-4-6-12"/><rect class="fk" x="94" y="62" width="34" height="17" rx="8"/>
+       <rect class="fk" x="98" y="74" width="6" height="16"/><rect class="fk" x="118" y="74" width="6" height="16"/>
+       <circle class="fk" cx="128" cy="58" r="11"/><ellipse class="fn" cx="123" cy="55" rx="4" ry="8"/>
+       <circle class="fn" cx="138" cy="58" r="2.5"/><circle class="fn" cx="130" cy="55" r="1.8"/><rect class="fc" x="119" y="64" width="12" height="4" rx="2"/>` },
+    { name: 'Remote workers', art: `
+      <rect class="fn" x="36" y="22" width="72" height="48" rx="4"/><rect class="fl" x="41" y="27" width="62" height="38"/>
+      <path class="fc" d="M72 33L56 46h5v13h22V46h5z"/>
+      <path class="fe" d="M26 72h92l-6 8H32z"/><rect class="fk" x="12" y="82" width="128" height="6" rx="3"/>
+      <rect class="fc" x="118" y="60" width="14" height="20" rx="2"/><path class="ln kc" stroke-width="3" d="M132 64q6 0 6 6q0 6-6 6"/>` },
+    { name: 'Teachers and schools', art: `
+      <rect class="fk" x="20" y="12" width="98" height="66" rx="4"/><rect class="fd" x="26" y="18" width="86" height="54"/>
+      ${txt(69, 52, 22, 'fw', 'ABC')}<path class="ln kw" stroke-width="2.5" d="M36 62h40"/>
+      <path class="ln kk" stroke-width="3" d="M124 70v-7"/><path class="fg" d="M124 66q2-10 10-10q-2 9-10 10z"/>
+      <circle class="fc" cx="118" cy="82" r="11"/><circle class="fc" cx="130" cy="82" r="11"/>` }
+  ],
+
+  constraint: [
+    { name: 'Zero waste', art: `
+      <rect class="fn" x="62" y="22" width="16" height="6" rx="2"/><rect class="fn" x="44" y="28" width="52" height="8" rx="3"/>
+      <rect class="fe" x="50" y="36" width="40" height="50" rx="4"/><path class="ln kw" stroke-width="3" d="M61 46v32M70 46v32M79 46v32"/>
+      <circle class="ln kc" stroke-width="8" cx="70" cy="56" r="38"/><path class="ln kc" stroke-width="8" d="M43 29l54 54"/>
+      ${txt(128, 60, 30, 'fd', '0')}` },
+    { name: 'Launch budget under €5,000', art: `
+      <ellipse class="fp" cx="64" cy="60" rx="35" ry="25"/><path class="fp" d="M48 40l4-15 13 10z"/>
+      <rect class="fp" x="93" y="52" width="13" height="15" rx="4"/><circle class="fn" cx="98" cy="58" r="1.6"/><circle class="fn" cx="102" cy="61" r="1.6"/>
+      <rect class="fp" x="40" y="76" width="10" height="15" rx="3"/><rect class="fp" x="74" y="76" width="10" height="15" rx="3"/>
+      <circle class="fn" cx="84" cy="50" r="3"/><rect class="fn" x="56" y="36" width="18" height="4" rx="2"/>
+      ${txt(62, 72, 24, 'fw', '€')}
+      <circle class="fy kn" stroke-width="3" cx="124" cy="24" r="16"/>${txt(124, 31, 20, 'fn', '€')}` },
+    { name: '100% online', art: `
+      <circle class="fb" cx="68" cy="52" r="36"/>
+      <ellipse class="ln kw" stroke-width="3" cx="68" cy="52" rx="15" ry="36"/>
+      <path class="ln kw" stroke-width="3" d="M32 52h72M38 34h60M38 70h60M68 16v72"/>
+      <path class="fn kw" stroke-width="3" d="M100 56l30 11-12 5 10 13-7 5-10-13-7 10z"/>` },
+    { name: 'Only one employee', art: fig(64, 18, 1.5, 'fb', 'fn') +
+      `<circle class="fy kn" stroke-width="3" cx="118" cy="30" r="17"/>${txt(118, 38, 22, 'fn', '1')}` },
+    { name: 'Must use artificial intelligence', art: `
+      <path class="ln kn" stroke-width="4" d="M75 22v-10"/><circle class="fc" cx="75" cy="10" r="6"/>
+      <rect class="fn" x="36" y="36" width="8" height="18" rx="3"/><rect class="fn" x="106" y="36" width="8" height="18" rx="3"/>
+      <rect class="fe" x="44" y="22" width="62" height="50" rx="12"/>
+      <circle class="fb" cx="62" cy="44" r="9"/><circle class="fb" cx="88" cy="44" r="9"/>
+      <circle class="fw" cx="64" cy="42" r="3"/><circle class="fw" cx="90" cy="42" r="3"/>
+      <rect class="fn" x="62" y="58" width="26" height="6" rx="3"/>
+      <rect class="fb" x="52" y="74" width="46" height="22" rx="6"/>${txt(75, 92, 16, 'fy', 'AI')}` },
+    { name: 'No physical shop: it must be mobile', art: `
+      <path class="ln kn" stroke-width="3" d="M4 48h10M2 58h12M6 68h8"/>
+      <rect class="fy" x="20" y="32" width="82" height="48" rx="6"/>
+      <path class="fy" d="M100 44h20l12 16v20h-32z"/><path class="fl" d="M105 48h13l8 11h-21z"/>
+      <rect class="fn" x="30" y="44" width="50" height="20" rx="2"/><path class="fc" d="M26 40h58l-4 10H30z"/>
+      <circle class="fn" cx="42" cy="82" r="10"/><circle class="fe" cx="42" cy="82" r="4"/>
+      <circle class="fn" cx="114" cy="82" r="10"/><circle class="fe" cx="114" cy="82" r="4"/>` },
+    { name: 'Subscription only', art: `
+      <rect class="fw kn" stroke-width="4" x="26" y="24" width="66" height="64" rx="6"/>
+      <path class="fb" d="M26 30a6 6 0 0 1 6-6h54a6 6 0 0 1 6 6v12H26z"/>
+      <rect class="fn" x="40" y="15" width="7" height="16" rx="3"/><rect class="fn" x="71" y="15" width="7" height="16" rx="3"/>
+      <rect class="fl" x="34" y="50" width="10" height="9"/><rect class="fl" x="50" y="50" width="10" height="9"/><rect class="fl" x="66" y="50" width="10" height="9"/>
+      <rect class="fl" x="34" y="66" width="10" height="9"/><rect class="fl" x="50" y="66" width="10" height="9"/>
+      <circle class="fc" cx="108" cy="68" r="24"/>
+      <path class="ln kw" stroke-width="5" d="M95 64a13 13 0 0 1 24-5"/><path class="fw" d="M123 50l-1 13-11-4z"/>
+      <path class="ln kw" stroke-width="5" d="M121 72a13 13 0 0 1-24 5"/><path class="fw" d="M93 86l1-13 11 4z"/>` },
+    { name: 'Must create local jobs', art: fig(36, 46, 0.9, 'fb', 'fn') + fig(114, 46, 0.9, 'fg', 'fk') + fig(75, 40, 1.05, 'fc', 'fn') +
+      `<path class="fy kn" stroke-width="3" d="M75 34c-8-10-12-15-12-21a12 12 0 0 1 24 0c0 6-4 11-12 21z"/><circle class="fn" cx="75" cy="13" r="4"/>` },
+    { name: 'Launch in less than 3 months', art: `
+      <rect class="fn" x="40" y="10" width="54" height="8" rx="3"/><rect class="fn" x="40" y="84" width="54" height="8" rx="3"/>
+      <path class="fw kn" stroke-width="3" d="M46 18h42q0 22-21 33q21 11 21 33H46q0-22 21-33q-21-11-21-33z"/>
+      <path class="fy" d="M53 25h28q-4 14-14 21q-10-7-14-21z"/><path class="fy" d="M51 80q4-16 16-19q12 3 16 19z"/>
+      <rect class="fb" x="104" y="36" width="36" height="40" rx="5"/><rect class="fn" x="104" y="36" width="36" height="10" rx="4"/>
+      ${txt(122, 70, 22, 'fw', '3')}` },
+    { name: 'Your product costs less than €10', art: `
+      <path class="fy kn" stroke-width="4" d="M24 30h70l30 26-30 26H24z"/>
+      <circle class="fw kn" stroke-width="3" cx="102" cy="56" r="5"/><path class="ln kn" stroke-width="3" d="M107 56q20-8 32-34"/>
+      ${txt(58, 64, 19, 'fn', '€9.99')}` },
+    { name: 'Must work without the internet', art: `
+      <path class="ln kn" stroke-width="8" d="M34 46a58 58 0 0 1 82 0M47 60a38 38 0 0 1 56 0M60 74a18 18 0 0 1 30 0"/>
+      <circle class="fn" cx="75" cy="87" r="6"/>
+      <path class="ln kw" stroke-width="15" d="M40 16l70 74"/><path class="ln kc" stroke-width="8" d="M40 16l70 74"/>` },
+    { name: 'Partner with a big brand', art: `
+      <rect class="fb" x="4" y="46" width="44" height="22" rx="4" transform="rotate(-15 26 57)"/>
+      <rect class="fc" x="102" y="46" width="44" height="22" rx="4" transform="rotate(15 124 57)"/>
+      <path class="fs" d="M42 48q16-12 34-4l30 2q9 4 0 13l-20 18q-8 6-16 0L42 68z"/>
+      <path class="ln kk" stroke-width="2.5" d="M68 58l10 8M75 53l12 9M84 50l10 8"/>
+      ${star(75, 20, 14, 'fy')}` },
+    { name: 'Free for users: find another way to make money', art: `
+      <rect class="fb" x="34" y="48" width="60" height="44" rx="3"/><rect class="fn" x="30" y="38" width="68" height="14" rx="3"/>
+      <rect class="fy" x="59" y="38" width="10" height="54"/>
+      <path class="fy" d="M64 38q-24-22-22-4q2 6 22 4zM64 38q24-22 22-4q-2 6-22 4z"/>
+      <g transform="rotate(14 120 30)"><rect class="fn" x="96" y="20" width="50" height="22" rx="5"/>${txt(121, 36, 14, 'fw', 'FREE')}</g>` },
+    { name: 'Sold only in physical shops', art: `
+      <rect class="fb" x="48" y="30" width="18" height="34" rx="2"/><rect class="fy" x="70" y="22" width="20" height="42" rx="2"/>
+      <rect class="fg" x="94" y="36" width="14" height="28" rx="2"/>
+      <path class="ln kn" stroke-width="6" d="M14 20h16l12 48h62l10-34H38"/>
+      <circle class="fn" cx="52" cy="84" r="7"/><circle class="fn" cx="96" cy="84" r="7"/>` },
+    { name: 'Must reduce CO2 emissions', art: `
+      <circle class="fe" cx="48" cy="54" r="17"/><circle class="fe" cx="72" cy="42" r="23"/><circle class="fe" cx="98" cy="54" r="17"/>
+      <rect class="fe" x="48" y="50" width="50" height="21"/>
+      ${txt(73, 64, 18, 'fn', 'CO₂')}
+      <path class="fg" d="M116 50h14v22h11l-18 22-18-22h11z"/>` }
+  ]
+};
+
+/* ---------- Other illustrations (not meant to be edited) ---------- */
+
+const CARD_TYPES = [
+  { key: 'theme', label: 'THEME' },
+  { key: 'target', label: 'TARGET' },
+  { key: 'constraint', label: 'CONSTRAINT' }
+];
+const BUILD_TIMES = [10, 15, 20, 30, 45];
+const PITCH_TIMES = [3, 5];
+
+const TOOLKIT = [
+  'Our startup is called…',
+  'We help [target] to [solve a problem].',
+  'The problem is… / Our solution is…',
+  'Our customers are…',
+  'We make money by…',
+  'What makes us different is…',
+  'Our key partners are…',
+  'Thank you! Any questions?'
+];
+
+// Mascot: a small rocket with eyes (viewBox 0 0 100 140)
+const MASCOT_SVG = `<svg viewBox="0 0 100 140" aria-hidden="true">
+  <g class="flame"><path class="fo" d="M36 104Q50 142 64 104Z"/><path class="fy" d="M43 104Q50 126 57 104Z"/></g>
+  <path class="fc" d="M30 72L14 102l20-6z"/><path class="fc" d="M70 72l16 30-20-6z"/>
+  <path class="fw" d="M50 6Q78 28 72 76l-4 30H32l-4-30Q22 28 50 6Z"/>
+  <path class="fc" d="M50 6Q63 16 69 30H31Q37 16 50 6Z"/>
+  <circle class="fn" cx="41" cy="54" r="7.5"/><circle class="fn" cx="59" cy="54" r="7.5"/>
+  <circle class="fw" cx="43.5" cy="51.5" r="2.6"/><circle class="fw" cx="61.5" cy="51.5" r="2.6"/>
+  <circle class="fp" cx="34" cy="66" r="4"/><circle class="fp" cx="66" cy="66" r="4"/>
+  <path class="ln kn" stroke-width="3" d="M43 68q7 6 14 0"/>
+  <rect class="fb" x="30" y="86" width="40" height="7" rx="3"/></svg>`;
+
+// Logo rocket used on card backs and in the header
+const LOGO_SVG = `<svg viewBox="0 0 100 140" aria-hidden="true">
+  <g class="flame"><path class="fo" d="M36 104Q50 140 64 104Z"/><path class="fy" d="M43 104Q50 124 57 104Z"/></g>
+  <path class="fc" d="M30 72L14 102l20-6z"/><path class="fc" d="M70 72l16 30-20-6z"/>
+  <path class="fw" d="M50 6Q78 28 72 76l-4 30H32l-4-30Q22 28 50 6Z"/>
+  <path class="fc" d="M50 6Q63 16 69 30H31Q37 16 50 6Z"/>
+  <circle class="fb kn" stroke-width="4" cx="50" cy="56" r="11"/></svg>`;
+
+const BACK_SVG = `<svg viewBox="0 0 100 120" aria-hidden="true">
+  <circle cx="50" cy="60" r="44" fill="rgba(255,255,255,.08)"/>
+  ${star(16, 18, 5, 'fy twinkle')}${star(86, 24, 4, 'fw twinkle d2')}${star(84, 100, 5, 'fy twinkle d3')}
+  <g transform="translate(22 8) scale(.56)">
+    <path class="fo" d="M36 104Q50 140 64 104Z"/>
+    <path class="fc" d="M30 72L14 102l20-6z"/><path class="fc" d="M70 72l16 30-20-6z"/>
+    <path class="fw" d="M50 6Q78 28 72 76l-4 30H32l-4-30Q22 28 50 6Z"/><path class="fc" d="M50 6Q63 16 69 30H31Q37 16 50 6Z"/>
+  </g>
+  ${txt(50, 112, 40, 'fy', '?')}</svg>`;
+
+// Avatars: one per team (viewBox 0 0 100 100). color = team accent colour.
+const AVATARS = [
+  { name: 'Fox', color: 'var(--orange)', svg: `<circle cx="50" cy="50" r="49" style="fill:var(--av-bg1)"/>
+    <path class="fo" d="M16 30L28 6l18 20h8L72 6l12 24q6 34-34 58Q10 64 16 30Z"/>
+    <path class="fn" d="M26 14l4 14-10 2zM74 14l-4 14 10 2z"/>
+    <path class="fw" d="M20 50q16 4 30 34q-22-4-30-34zM80 50q-16 4-30 34q22-4 30-34z"/>
+    <circle class="fn" cx="37" cy="46" r="5"/><circle class="fn" cx="63" cy="46" r="5"/><circle class="fn" cx="50" cy="80" r="5"/>` },
+  { name: 'Owl', color: 'var(--purple)', svg: `<circle cx="50" cy="50" r="49" style="fill:var(--av-bg2)"/>
+    <path class="fv" d="M20 30L30 14l10 12h20l10-12 10 16v34q0 26-30 26T20 64Z"/>
+    <ellipse class="fp" cx="50" cy="72" rx="16" ry="14"/>
+    <circle class="fw" cx="37" cy="44" r="13"/><circle class="fw" cx="63" cy="44" r="13"/>
+    <circle class="fn" cx="38" cy="45" r="6.5"/><circle class="fn" cx="62" cy="45" r="6.5"/>
+    <path class="fo" d="M44 56h12l-6 10z"/>` },
+  { name: 'Panda', color: 'var(--charcoal)', svg: `<circle cx="50" cy="50" r="49" style="fill:var(--av-bg3)"/>
+    <circle class="fh" cx="23" cy="24" r="12"/><circle class="fh" cx="77" cy="24" r="12"/>
+    <circle class="fw" cx="50" cy="54" r="35"/>
+    <ellipse class="fh" cx="36" cy="50" rx="9" ry="12" transform="rotate(25 36 50)"/>
+    <ellipse class="fh" cx="64" cy="50" rx="9" ry="12" transform="rotate(-25 64 50)"/>
+    <circle class="fw" cx="37" cy="48" r="3.5"/><circle class="fw" cx="63" cy="48" r="3.5"/>
+    <ellipse class="fh" cx="50" cy="66" rx="7" ry="5"/><path class="ln kn" stroke-width="3" d="M43 74q7 5 14 0"/>` },
+  { name: 'Frog', color: 'var(--green)', svg: `<circle cx="50" cy="50" r="49" style="fill:var(--av-bg4)"/>
+    <circle class="fg" cx="30" cy="36" r="15"/><circle class="fg" cx="70" cy="36" r="15"/>
+    <ellipse class="fg" cx="50" cy="62" rx="40" ry="28"/>
+    <circle class="fw" cx="30" cy="34" r="10"/><circle class="fw" cx="70" cy="34" r="10"/>
+    <circle class="fn" cx="31" cy="35" r="5.5"/><circle class="fn" cx="69" cy="35" r="5.5"/>
+    <path class="ln kn" stroke-width="4" d="M30 66q20 14 40 0"/><circle class="fp" cx="22" cy="62" r="5"/><circle class="fp" cx="78" cy="62" r="5"/>` },
+  { name: 'Lion', color: 'var(--gold)', svg: `<circle cx="50" cy="50" r="49" style="fill:var(--av-bg5)"/>
+    <circle class="fk" cx="50" cy="50" r="40"/>
+    <circle class="fk" cx="22" cy="28" r="12"/><circle class="fk" cx="78" cy="28" r="12"/><circle class="fk" cx="16" cy="56" r="12"/>
+    <circle class="fk" cx="84" cy="56" r="12"/><circle class="fk" cx="30" cy="82" r="12"/><circle class="fk" cx="70" cy="82" r="12"/>
+    <circle class="fq" cx="50" cy="54" r="28"/>
+    <circle class="fn" cx="40" cy="48" r="4.5"/><circle class="fn" cx="60" cy="48" r="4.5"/>
+    <path class="fn" d="M44 60h12l-6 7z"/><path class="ln kn" stroke-width="3" d="M50 67v4q-5 5-10 1M50 71q5 5 10 1"/>` },
+  { name: 'Penguin', color: 'var(--teal)', svg: `<circle cx="50" cy="50" r="49" style="fill:var(--av-bg6)"/>
+    <circle class="fn" cx="50" cy="54" r="38"/>
+    <path class="fw" d="M50 44q-8-14-20-10q-12 6-8 26q6 22 28 26q22-4 28-26q4-20-8-26q-12-4-20 10z"/>
+    <circle class="fn" cx="38" cy="52" r="5"/><circle class="fn" cx="62" cy="52" r="5"/>
+    <path class="fo" d="M42 60h16l-8 10z"/><circle class="fp" cx="30" cy="64" r="4"/><circle class="fp" cx="70" cy="64" r="4"/>` },
+  { name: 'Octopus', color: 'var(--magenta)', svg: `<circle cx="50" cy="50" r="49" style="fill:var(--av-bg7)"/>
+    <path class="fm" d="M16 56a34 34 0 0 1 68 0v14H16Z"/>
+    <circle class="fm" cx="20" cy="74" r="8"/><circle class="fm" cx="35" cy="78" r="8"/><circle class="fm" cx="50" cy="80" r="8"/>
+    <circle class="fm" cx="65" cy="78" r="8"/><circle class="fm" cx="80" cy="74" r="8"/>
+    <circle class="fw" cx="38" cy="48" r="9"/><circle class="fw" cx="62" cy="48" r="9"/>
+    <circle class="fn" cx="39" cy="49" r="4.5"/><circle class="fn" cx="61" cy="49" r="4.5"/>
+    <path class="ln kn" stroke-width="3" d="M44 62q6 5 12 0"/>` },
+  { name: 'Ladybug', color: 'var(--red)', svg: `<circle cx="50" cy="50" r="49" style="fill:var(--av-bg8)"/>
+    <path class="ln kn" stroke-width="3" d="M40 22q-6-12-14-12M60 22q6-12 14-12"/>
+    <circle class="fr" cx="50" cy="58" r="34"/>
+    <path class="fn" d="M26 40a26 22 0 0 1 48 0Z"/><path class="ln kn" stroke-width="3" d="M50 40v52"/>
+    <circle class="fn" cx="34" cy="58" r="6"/><circle class="fn" cx="66" cy="58" r="6"/><circle class="fn" cx="38" cy="78" r="5"/><circle class="fn" cx="62" cy="78" r="5"/>
+    <circle class="fw" cx="41" cy="32" r="4"/><circle class="fw" cx="59" cy="32" r="4"/>
+    <circle class="fn" cx="42" cy="33" r="2"/><circle class="fn" cx="58" cy="33" r="2"/>` }
+];
+
+// Gear outline for the BUILD scene
+function gearPath(cx, cy, ro, ri, teeth) {
+  let d = '';
+  const step = Math.PI * 2 / teeth;
+  for (let i = 0; i < teeth; i++) {
+    const a = i * step;
+    const pts = [[ri, a], [ro, a + step * 0.15], [ro, a + step * 0.45], [ri, a + step * 0.6]];
+    pts.forEach(([r, ang], k) => {
+      d += (i === 0 && k === 0 ? 'M' : 'L') + (cx + r * Math.cos(ang)).toFixed(1) + ' ' + (cy + r * Math.sin(ang)).toFixed(1);
+    });
+  }
+  return d + 'Z';
+}
+function wedge(cx, cy, r, a0, a1, cls) {
+  const p = a => (cx + r * Math.cos(a)).toFixed(1) + ' ' + (cy + r * Math.sin(a)).toFixed(1);
+  return `<path class="${cls}" d="M${cx} ${cy}L${p(a0)}A${r} ${r} 0 0 1 ${p(a1)}Z"/>`;
+}
+
+// Large decorative scene for each step (viewBox 0 0 300 200)
+const SCENES = {
+  title: `<svg viewBox="0 0 300 220" aria-hidden="true">
+    ${star(40, 40, 7, 'fy twinkle')}${star(255, 30, 6, 'fw twinkle d2')}${star(250, 120, 8, 'fy twinkle d3')}
+    ${star(52, 130, 5, 'fw twinkle d2')}${star(90, 18, 4, 'fw twinkle')}${star(210, 70, 4, 'fw twinkle d3')}
+    <g class="float">
+      <g class="flame"><path class="fo" d="M128 160Q150 236 172 160Z"/><path class="fy" d="M139 160Q150 206 161 160Z"/></g>
+      <path class="fc" d="M122 118L98 162l28-9z"/><path class="fc" d="M178 118l24 44-28-9z"/>
+      <path class="fw" d="M150 18Q190 52 182 124l-6 38H124l-6-38Q110 52 150 18Z"/>
+      <path class="fc" d="M150 18Q170 34 178 58H122Q130 34 150 18Z"/>
+      <circle class="fb kn" stroke-width="6" cx="150" cy="92" r="17"/><circle class="fw" cx="144" cy="86" r="4.5" opacity=".7"/>
+      <rect class="fy" x="121" y="128" width="58" height="9"/><rect class="fc" x="145" y="134" width="10" height="32" rx="5"/>
+    </g>
+    <g class="fw" opacity=".95"><circle cx="64" cy="222" r="30"/><circle cx="106" cy="210" r="30"/><circle cx="150" cy="216" r="28"/>
+    <circle cx="194" cy="210" r="30"/><circle cx="236" cy="222" r="30"/></g></svg>`,
+
+  draw: `<svg viewBox="0 0 300 200" aria-hidden="true">
+    <path class="fn" d="M74 190l26-30 26 30z"/>
+    <g class="spin-slow">${[0, 1, 2, 3, 4, 5, 6, 7].map(i =>
+      wedge(100, 92, 72, i * Math.PI / 4, (i + 1) * Math.PI / 4, ['fy', 'fc', 'fl', 'fw'][i % 4])).join('')}
+      <circle class="ln kn" stroke-width="6" cx="100" cy="92" r="72"/></g>
+    <circle class="fn" cx="100" cy="92" r="12"/><path class="fn" d="M90 8h20l-10 22z"/>
+    <g transform="rotate(-18 232 180)"><rect class="fl kn" stroke-width="4" x="204" y="66" width="56" height="80" rx="9"/>${txt(232, 120, 40, 'fn', '?')}</g>
+    <g transform="rotate(0 232 180)"><rect class="fy kn" stroke-width="4" x="204" y="62" width="56" height="80" rx="9"/>${txt(232, 116, 40, 'fn', '?')}</g>
+    <g transform="rotate(18 232 180)"><rect class="fc kn" stroke-width="4" x="204" y="66" width="56" height="80" rx="9"/>${txt(232, 120, 40, 'fw', '?')}</g>
+    ${star(280, 40, 8, 'fy twinkle')}${star(186, 30, 6, 'fw twinkle d2')}</svg>`,
+
+  build: `<svg viewBox="0 0 300 200" aria-hidden="true">
+    <g transform="rotate(-8 50 46)"><rect class="fy" x="26" y="22" width="48" height="48" rx="3"/>
+      <path class="ln kn" stroke-width="3" d="M34 38h30M34 48h24M34 58h28"/></g>
+    <g transform="rotate(6 250 160)"><rect class="fc" x="228" y="138" width="44" height="44" rx="3"/>
+      <path class="ln kw" stroke-width="3" d="M236 154h28M236 164h20"/></g>
+    <path class="fn spin" d="${gearPath(70, 140, 40, 31, 10)}"/><circle class="fe" cx="70" cy="140" r="13"/>
+    <path class="fb spin-rev" d="${gearPath(122, 104, 24, 18, 8)}"/><circle class="fw" cx="122" cy="104" r="7"/>
+    <path class="ln ky glow" stroke-width="7" d="M190 6v14M146 26l10 10M234 26l-10 10M134 70h14M232 70h14"/>
+    <circle class="fy" cx="190" cy="68" r="36"/>
+    <path class="ln kn" stroke-width="4" d="M178 72l6 8 6-8 6 8 6-8"/>
+    <rect class="fe" x="174" y="100" width="32" height="22" rx="4"/><path class="ln kw" stroke-width="3" d="M178 108h24M178 115h24"/>
+    <rect class="fn" x="180" y="122" width="20" height="8" rx="4"/>
+    <g transform="rotate(22 262 100)"><rect class="fe" x="254" y="44" width="16" height="10"/><rect class="fc" x="254" y="54" width="16" height="70"/>
+      <path class="fs" d="M254 124h16l-8 18z"/><path class="fn" d="M258 133h8l-4 9z"/></g>
+    <g transform="rotate(-12 236 120)"><rect class="fe" x="230" y="62" width="14" height="9"/><rect class="fy" x="230" y="71" width="14" height="62"/>
+      <path class="fs" d="M230 133h14l-7 16z"/><path class="fn" d="M233.5 141h7l-3.5 8z"/></g></svg>`,
+
+  pitch: `<svg viewBox="0 0 300 200" aria-hidden="true">
+    <path class="fy beam" d="M64 16h18l118 172H70z" opacity=".35"/><path class="fy beam" d="M218 16h18L230 188H100z" opacity=".35"/>
+    <rect class="fn" x="58" y="6" width="28" height="16" rx="4" transform="rotate(25 72 14)"/>
+    <rect class="fn" x="214" y="6" width="28" height="16" rx="4" transform="rotate(-25 228 14)"/>
+    <path class="fc" d="M0 0h52Q38 100 62 200H0Z"/><path class="fc" d="M300 0h-52Q262 100 238 200H300Z"/>
+    <rect class="fc" x="0" y="0" width="300" height="14"/>
+    <ellipse class="fn" cx="150" cy="186" rx="120" ry="16"/>
+    <path class="ln kn" stroke-width="6" d="M150 182V112M130 184h40"/>
+    <rect class="fe kn" stroke-width="3" x="139" y="74" width="22" height="40" rx="11"/>
+    <path class="ln kw" stroke-width="3" d="M144 86h12M144 94h12M144 102h12"/>
+    ${star(110, 50, 7, 'fw twinkle')}${star(196, 60, 6, 'fy twinkle d2')}</svg>`,
+
+  score: `<svg viewBox="0 0 300 200" aria-hidden="true">
+    ${fig(62, 40, 1.25, 'fc', 'fk')}${fig(150, 30, 1.35, 'fb', 'fn')}${fig(238, 40, 1.25, 'fg', 'fe')}
+    <rect class="fw kn" stroke-width="3" x="38" y="80" width="48" height="38" rx="5"/>${txt(62, 110, 30, 'fn', '5')}
+    <rect class="fw kn" stroke-width="3" x="126" y="72" width="48" height="38" rx="5"/>${txt(150, 102, 30, 'fn', '4')}
+    <rect class="fw kn" stroke-width="3" x="214" y="80" width="48" height="38" rx="5"/>${txt(238, 110, 30, 'fn', '5')}
+    <rect class="fn" x="14" y="124" width="272" height="66" rx="6"/><rect class="fy" x="14" y="124" width="272" height="10"/>
+    ${star(150, 160, 14, 'fy')}</svg>`,
+
+  results: `<svg viewBox="0 0 300 200" aria-hidden="true">
+    ${star(40, 30, 8, 'fy twinkle')}${star(262, 40, 7, 'fw twinkle d2')}${star(250, 100, 5, 'fy twinkle d3')}${star(48, 96, 5, 'fw twinkle d2')}
+    <path class="ln ky glow" stroke-width="5" d="M150 4v10M112 16l7 7M188 16l-7 7"/>
+    <path class="fy kk" stroke-width="3" d="M122 30h56v16q0 30-28 34q-28-4-28-34z"/>
+    <path class="ln ky" stroke-width="7" d="M122 40h-12q0 20 16 24M178 40h12q0 20-16 24"/>
+    ${star(150, 50, 10, 'fw')}<rect class="fy" x="144" y="80" width="12" height="12"/><rect class="fk" x="130" y="90" width="40" height="12" rx="2"/>
+    <rect class="fw" x="40" y="132" width="72" height="68"/>${txt(76, 172, 30, 'fn', '2')}
+    <rect class="fy" x="112" y="104" width="76" height="96"/>${txt(150, 150, 36, 'fn', '1')}
+    <rect class="fc" x="188" y="150" width="72" height="50"/>${txt(224, 184, 28, 'fw', '3')}</svg>`
+};
+
+const POSTER1_SVG = `<svg viewBox="0 0 60 70" aria-hidden="true"><rect class="fw kn" stroke-width="3" x="5" y="3" width="50" height="64" rx="4"/>
+  <circle class="fy kn" stroke-width="2" cx="30" cy="22" r="11"/>${star(30, 22, 6, 'fc')}
+  <rect class="fn" x="14" y="38" width="32" height="5" rx="2"/><rect class="fe" x="14" y="47" width="24" height="4" rx="2"/>
+  <rect class="fe" x="14" y="55" width="28" height="4" rx="2"/></svg>`;
+const POSTER2_SVG = `<svg viewBox="0 0 60 70" aria-hidden="true"><rect class="fw kn" stroke-width="3" x="3" y="10" width="54" height="46" rx="3"/>
+  <rect class="fl" x="7" y="14" width="9" height="26"/><rect class="fy" x="18" y="14" width="9" height="12"/><rect class="fy" x="18" y="28" width="9" height="12"/>
+  <rect class="fc" x="29" y="14" width="9" height="26"/><rect class="fl" x="40" y="14" width="6" height="12"/><rect class="fl" x="40" y="28" width="6" height="12"/>
+  <rect class="fg" x="48" y="14" width="5" height="26"/><rect class="fe" x="7" y="42" width="22" height="10"/><rect class="fe" x="31" y="42" width="22" height="10"/></svg>`;
+
+// Interface icons (stroke = currentColor)
+const ic = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const ICONS = {
+  soundOn: ic('<path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/>'),
+  soundOff: ic('<path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M17 9l5 6M22 9l-5 6"/>'),
+  full: ic('<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>'),
+  home: ic('<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/>'),
+  zoom: ic('<circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21M10.5 7.5v6M7.5 10.5h6"/>'),
+  reroll: ic('<path d="M20 11a8 8 0 0 0-14.5-4.5L4 8"/><path d="M4 3v5h5"/><path d="M4 13a8 8 0 0 0 14.5 4.5L20 16"/><path d="M20 21v-5h-5"/>'),
+  up: ic('<path d="M6 15l6-6 6 6"/>'),
+  down: ic('<path d="M6 9l6 6 6-6"/>'),
+  grip: ic('<path d="M5 8h14M5 12h14M5 16h14"/>'),
+  play: ic('<path d="M7 4l13 8-13 8z" fill="currentColor"/>'),
+  pause: ic('<path d="M7 4v16M17 4v16" stroke-width="4"/>'),
+  reset: ic('<path d="M4 12a8 8 0 1 0 3-6.2"/><path d="M4 3v5h5"/>'),
+  next: ic('<path d="M9 5l7 7-7 7"/>'),
+  prev: ic('<path d="M15 5l-7 7 7 7"/>'),
+  arrow: ic('<path d="M5 12h14M13 6l6 6-6 6"/>'),
+  check: ic('<path d="M5 12l5 5 9-10"/>'),
+  close: ic('<path d="M6 6l12 12M18 6L6 18"/>'),
+  book: ic('<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M8 7h7M8 11h5"/>'),
+  edit: ic('<path d="M4 20h4L19 9l-4-4L4 16z"/>')
+};
+const STAR_SVG = on => `<svg viewBox="0 0 24 24" aria-hidden="true"><path class="star-shape${on ? ' on' : ''}" d="M12 2l3 6.6 7.2.8-5.4 4.9 1.5 7.1L12 17.8 5.7 21.4l1.5-7.1L1.8 9.4 9 8.6z"/></svg>`;
+
+/* =====================================================================
+   GAME STATE + SAVING
+   ===================================================================== */
+const STORE_KEY = 'startupRun.save.v1';
+const STEPS = [
+  { key: 'draw', label: 'DRAW' }, { key: 'build', label: 'BUILD' }, { key: 'pitch', label: 'PITCH' },
+  { key: 'score', label: 'SCORE' }, { key: 'winner', label: 'WINNER' }
+];
+const STEP_INDEX = { setup: 0, draw: 1, build: 2, pitch: 3, score: 4, winner: 5 };
+
+function makeTimer(min) {
+  return { duration: min * 60000, remaining: min * 60000, endAt: null, running: false, done: false };
+}
+function defaultSetup() {
+  return { numTeams: 4, names: Array.from({ length: 8 }, (_, i) => `Team ${i + 1}`), buildMin: 20, pitchMin: 3 };
+}
+function newState(sound = true, setup = defaultSetup()) {
+  return {
+    version: 1, step: 'setup', maxStep: 0, sound, setup,
+    teams: [],
+    build: { timer: makeTimer(setup.buildMin) },
+    pitch: { order: [], ordered: false, current: 0, timer: makeTimer(setup.pitchMin) },
+    scoreView: { team: null, from: null, draft: null },
+    result: null,
+    savedAt: Date.now()
+  };
+}
+
+let state = newState();
+const ui = { modal: null, resume: null, busy: false };
+
+function save() {
+  if (ui.resume) return; // never overwrite the saved game while the "Continue?" screen is shown
+  state.savedAt = Date.now();
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { /* storage blocked: game still works */ }
+}
+function loadSaved() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (!raw) return null;
+    const s = JSON.parse(raw);
+    return s && s.version === 1 && s.setup ? s : null;
+  } catch (e) { return null; }
+}
+function clearSave() {
+  try { localStorage.removeItem(STORE_KEY); } catch (e) { /* ignore */ }
+}
+// A timer that was running when the page closed is paused at the time of the last save.
+function restoreTimers(s) {
+  [s.build.timer, s.pitch.timer].forEach(t => {
+    if (t.running) {
+      t.remaining = Math.max(0, t.endAt - (s.savedAt || Date.now()));
+      t.running = false; t.endAt = null;
+      if (t.remaining === 0) t.done = true;
+    }
+  });
+  return s;
+}
+
+/* ---------- Small helpers ---------- */
+const $ = sel => document.querySelector(sel);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const range = n => Array.from({ length: n }, (_, i) => i);
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+const displayName = t => (t.startupName || '').trim() || t.name;
+const avatarHTML = i => `<span class="avatar"><svg viewBox="0 0 100 100" aria-hidden="true">${AVATARS[i % AVATARS.length].svg}</svg></span>`;
+const svgWrap = (inner, vb = '0 0 150 100') => `<svg viewBox="${vb}" aria-hidden="true">${inner}</svg>`;
+const sceneHTML = key => `<div class="scene">${SCENES[key]}</div>`;
+const isReady = t => CARD_TYPES.every(c => t.cards[c.key] !== null);
+const allReady = () => state.teams.length > 0 && state.teams.every(isReady);
+const isScored = t => t.scores.every(v => v !== null);
+const allScored = () => state.teams.every(isScored);
+const sumScores = t => t.scores.reduce((a, v) => a + (v || 0), 0);
+const ordinal = n => n + (n % 10 === 1 && n !== 11 ? 'st' : n % 10 === 2 && n !== 12 ? 'nd' : n % 10 === 3 && n !== 13 ? 'rd' : 'th');
+function fmtTime(ms) {
+  const s = Math.ceil(ms / 1000);
+  return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+}
+
+/* =====================================================================
+   SOUND (Web Audio API, no files)
+   ===================================================================== */
+const Sound = {
+  ctx: null, master: null, noiseBuf: null,
+  ensure() {
+    if (!this.ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      try {
+        this.ctx = new AC();
+        this.master = this.ctx.createGain();
+        this.master.gain.value = state.sound ? 0.7 : 0;
+        this.master.connect(this.ctx.destination);
+      } catch (e) { this.ctx = null; return null; }
+    }
+    if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
+    return this.ctx;
+  },
+  // Master volume: muting also silences sounds that are already playing (drumroll, applause)
+  setEnabled(on) {
+    if (!this.master) return;
+    this.master.gain.cancelScheduledValues(0);
+    this.master.gain.value = on ? 0.7 : 0;
+  },
+  ok() { return state.sound && this.ensure(); },
+  tone(freq, start, dur, type = 'sine', vol = 0.25, freqEnd = null) {
+    const c = this.ctx, o = c.createOscillator(), g = c.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, start);
+    if (freqEnd) o.frequency.exponentialRampToValueAtTime(freqEnd, start + dur);
+    g.gain.setValueAtTime(0.0001, start);
+    g.gain.exponentialRampToValueAtTime(vol, start + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+    o.connect(g); g.connect(this.master);
+    o.start(start); o.stop(start + dur + 0.05);
+  },
+  noise(start, dur, vol, freq, type = 'bandpass', q = 1) {
+    const c = this.ctx;
+    if (!this.noiseBuf) {
+      this.noiseBuf = c.createBuffer(1, c.sampleRate * 2, c.sampleRate);
+      const d = this.noiseBuf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    const src = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+    src.buffer = this.noiseBuf;
+    f.type = type; f.frequency.value = freq; f.Q.value = q;
+    g.gain.setValueAtTime(0.0001, start);
+    g.gain.exponentialRampToValueAtTime(vol, start + 0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+    src.connect(f); f.connect(g); g.connect(this.master);
+    src.start(start, Math.random() * 1.5); src.stop(start + dur + 0.05);
+  },
+  tick() { if (!this.ok()) return; this.tone(700 + Math.random() * 500, this.ctx.currentTime, 0.04, 'square', 0.05); },
+  click() { if (!this.ok()) return; this.tone(500, this.ctx.currentTime, 0.05, 'triangle', 0.12); },
+  reveal() {
+    if (!this.ok()) return;
+    const t = this.ctx.currentTime;
+    [523, 659, 784, 1047].forEach((f, i) => this.tone(f, t + i * 0.07, 0.25, 'triangle', 0.2));
+  },
+  ready() {
+    if (!this.ok()) return;
+    const t = this.ctx.currentTime;
+    [523, 659, 784].forEach((f, i) => this.tone(f, t + i * 0.1, 0.18, 'square', 0.08));
+    this.tone(1047, t + 0.3, 0.5, 'square', 0.1);
+    this.tone(1319, t + 0.3, 0.5, 'triangle', 0.12);
+  },
+  pop() { if (!this.ok()) return; this.tone(400, this.ctx.currentTime, 0.15, 'sine', 0.3, 1200); },
+  alert() {
+    if (!this.ok()) return;
+    const t = this.ctx.currentTime;
+    this.tone(880, t, 0.15, 'square', 0.12); this.tone(880, t + 0.22, 0.15, 'square', 0.12);
+  },
+  timeUp() {
+    if (!this.ok()) return;
+    const t = this.ctx.currentTime;
+    [784, 659, 523].forEach((f, i) => this.tone(f, t + i * 0.18, 0.2, 'square', 0.12));
+    this.tone(392, t + 0.56, 0.8, 'square', 0.14);
+  },
+  buzzer() {
+    if (!this.ok()) return;
+    const t = this.ctx.currentTime;
+    this.tone(140, t, 1.0, 'sawtooth', 0.22); this.tone(147, t, 1.0, 'square', 0.12);
+  },
+  drumroll(sec = 2.5) {
+    if (!this.ok()) return;
+    const t = this.ctx.currentTime;
+    for (let x = 0; x < sec; x += 0.045) this.noise(t + x, 0.06, 0.15 + 0.35 * (x / sec), 900, 'bandpass', 0.8);
+    this.noise(t + sec, 1.2, 0.5, 5000, 'highpass');          // cymbal
+    this.tone(90, t + sec, 0.4, 'sine', 0.5, 50);              // kick
+  },
+  applause(sec = 4) {
+    if (!this.ok()) return;
+    const t = this.ctx.currentTime;
+    for (let i = 0; i < sec * 70; i++) {
+      const x = Math.random() * sec;
+      const fade = x > sec - 1 ? (sec - x) : 1;
+      this.noise(t + x, 0.03 + Math.random() * 0.03, (0.1 + Math.random() * 0.2) * fade + 0.001, 1200 + Math.random() * 2500, 'bandpass', 1.5);
+    }
+  }
+};
+
+/* =====================================================================
+   CONFETTI (hand-made canvas)
+   ===================================================================== */
+const Confetti = {
+  canvas: null, ctx: null, parts: [], running: false, colors: [],
+  init() {
+    this.canvas = $('#confetti');
+    this.ctx = this.canvas.getContext('2d');
+    const cs = getComputedStyle(document.documentElement);
+    this.colors = ['--accent', '--coral', '--white', '--sky', '--green', '--pink'].map(v => cs.getPropertyValue(v).trim());
+    this.resize();
+    window.addEventListener('resize', () => this.resize());
+  },
+  resize() {
+    const dpr = window.devicePixelRatio || 1;
+    this.canvas.width = innerWidth * dpr; this.canvas.height = innerHeight * dpr;
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  },
+  add(x, y, vx, vy) {
+    this.parts.push({
+      x, y, vx, vy, rot: Math.random() * 6, vr: (Math.random() - 0.5) * 0.4,
+      w: 6 + Math.random() * 8, h: 4 + Math.random() * 6, color: this.colors[Math.floor(Math.random() * this.colors.length)], life: 0
+    });
+  },
+  burst(x, y, n = 90) {
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * Math.PI * 2, s = 3 + Math.random() * 9;
+      this.add(x, y, Math.cos(a) * s, Math.sin(a) * s - 6);
+    }
+    this.start();
+  },
+  burstAt(el, n) {
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    this.burst(r.left + r.width / 2, r.top + r.height / 2, n);
+  },
+  rain(n = 260) {
+    for (let i = 0; i < n; i++) this.add(Math.random() * innerWidth, -Math.random() * innerHeight * 0.8, (Math.random() - 0.5) * 3, 2 + Math.random() * 3);
+    this.start();
+  },
+  start() {
+    if (this.running) return;
+    this.running = true;
+    requestAnimationFrame(() => this.frame());
+  },
+  frame() {
+    const c = this.ctx;
+    c.clearRect(0, 0, innerWidth, innerHeight);
+    this.parts = this.parts.filter(p => p.y < innerHeight + 30 && p.life < 600);
+    for (const p of this.parts) {
+      p.vy += 0.25; p.vx *= 0.99; p.vy *= 0.99;
+      p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.life++;
+      c.save(); c.translate(p.x, p.y); c.rotate(p.rot);
+      c.fillStyle = p.color; c.fillRect(-p.w / 2, -p.h / 2, p.w, p.h * Math.abs(Math.cos(p.life * 0.1)) + 1);
+      c.restore();
+    }
+    if (this.parts.length) requestAnimationFrame(() => this.frame());
+    else { this.running = false; c.clearRect(0, 0, innerWidth, innerHeight); }
+  }
+};
+
+/* =====================================================================
+   MASCOT
+   ===================================================================== */
+const Mascot = {
+  timer: null,
+  say(text, ms = 2800) {
+    $('#mascot-bubble').textContent = text;
+    $('#mascot').classList.add('show');
+    clearTimeout(this.timer);
+    this.timer = setTimeout(() => $('#mascot').classList.remove('show'), ms);
+  }
+};
+
+/* =====================================================================
+   TIMERS (always computed from the end time, so they stay right
+   when the tab is in the background)
+   ===================================================================== */
+const getTimer = kind => state[kind].timer;
+const timeLeft = t => t.running ? Math.max(0, t.endAt - Date.now()) : t.remaining;
+const lastLeft = { build: null, pitch: null };
+
+function timerStart(t) {
+  if (t.running || t.done || t.remaining <= 0) return;
+  t.endAt = Date.now() + t.remaining; t.running = true;
+}
+function timerPause(t) {
+  if (!t.running) return;
+  t.remaining = timeLeft(t); t.running = false; t.endAt = null;
+}
+function timerReset(t, durationMs = t.duration) {
+  t.duration = durationMs; t.remaining = durationMs; t.running = false; t.endAt = null; t.done = false;
+}
+function thresholds(kind) {
+  const t = getTimer(kind);
+  if (kind === 'pitch') return [30000];
+  return [300000, 60000].filter(th => t.duration > th);
+}
+function finishTimer(kind) {
+  const t = getTimer(kind);
+  t.running = false; t.remaining = 0; t.endAt = null; t.done = true;
+  save();
+  if (kind === 'build') Sound.timeUp(); else Sound.buzzer();
+  Mascot.say("Time's up!", 3500);
+  updateTimerDOM(kind);
+}
+function tick() {
+  ['build', 'pitch'].forEach(kind => {
+    const t = getTimer(kind);
+    const left = timeLeft(t);
+    const prev = lastLeft[kind];
+    if (t.running) {
+      if (prev !== null && thresholds(kind).some(th => prev > th && left <= th && left > 0)) Sound.alert();
+      if (left <= 0) finishTimer(kind);
+    }
+    lastLeft[kind] = left;
+    updateTimerDOM(kind);
+  });
+}
+function timerHTML(kind, size) {
+  return `<div class="timer" id="timer-${kind}" style="--tsize:${size}"><div class="digits">0:00</div></div>
+    <div class="timer-controls">
+      <button class="btn accent big main" data-action="timer-toggle" data-kind="${kind}" id="tbtn-${kind}"></button>
+      <button class="btn ghost" data-action="timer-add" data-kind="${kind}" data-ms="-60000">−1 min</button>
+      <button class="btn ghost" data-action="timer-add" data-kind="${kind}" data-ms="60000">+1 min</button>
+      <button class="btn ghost" data-action="timer-reset" data-kind="${kind}">${ICONS.reset} Reset</button>
+    </div>`;
+}
+function updateTimerDOM(kind) {
+  const box = document.getElementById('timer-' + kind);
+  if (!box) return;
+  const t = getTimer(kind);
+  const left = timeLeft(t);
+  const digits = t.done ? "TIME'S UP!" : fmtTime(left);
+  const d = box.firstElementChild;
+  if (d.textContent !== digits) d.textContent = digits;
+  const warnAt = kind === 'build' && t.duration > 300000 ? 300000 : -1;
+  const dangerAt = kind === 'build' ? 60000 : 30000;
+  box.classList.toggle('done', t.done);
+  box.classList.toggle('danger', !t.done && left <= dangerAt);
+  box.classList.toggle('warn', !t.done && left > dangerAt && left <= warnAt);
+  const btn = document.getElementById('tbtn-' + kind);
+  if (btn) {
+    let label;
+    if (t.running) label = ICONS.pause + ' Pause';
+    else if (left >= t.duration) label = ICONS.play + ' Start';
+    else label = ICONS.play + ' Resume';
+    if (btn.innerHTML !== label) btn.innerHTML = label;
+    btn.disabled = t.done || (!t.running && left <= 0);
+  }
+}
+function toggleTimer(kind) {
+  const t = getTimer(kind);
+  if (t.running) timerPause(t);
+  else { if (t.done) return; timerStart(t); if (t.running && timeLeft(t) >= t.duration - 500) Mascot.say('Ready? Go!', 1800); }
+  Sound.click(); save(); lastLeft[kind] = timeLeft(t); updateTimerDOM(kind);
+}
+
+/* =====================================================================
+   RENDERING
+   ===================================================================== */
+const typeLabel = type => CARD_TYPES.find(c => c.key === type).label;
+
+function render() {
+  document.body.dataset.step = ui.resume ? 'setup' : state.step;
+  renderHeader();
+  const screens = { setup: renderSetup, draw: renderDraw, build: renderBuild, pitch: renderPitch, score: renderScore, winner: renderWinner };
+  $('#main').innerHTML = ui.resume ? renderResume() : screens[state.step]();
+  renderModal();
+  updateTimerDOM('build');
+  updateTimerDOM('pitch');
+  afterRender();
+}
+
+// Starts the automatic animations a screen needs (also after "Continue")
+function afterRender() {
+  if (ui.resume || ui.busy) return;
+  const needsShuffle = () => state.step === 'pitch' && !state.pitch.ordered && state.pitch.order.length !== state.teams.length;
+  if (needsShuffle()) setTimeout(() => { if (needsShuffle()) runShuffle(); }, 500);
+  if (state.step === 'winner' && state.result && state.result.phase === 'ranking' && !state.result.animated) runRankingAnimation();
+}
+
+function renderHeader() {
+  const showSteps = !ui.resume && state.step !== 'setup';
+  const cur = STEP_INDEX[state.step];
+  const steps = !showSteps ? '' : STEPS.map((s, i) => {
+    const idx = i + 1;
+    const cls = idx === cur ? 'current' : idx <= state.maxStep ? 'done' : 'locked';
+    return (i ? `<span class="step-arrow">${ICONS.next}</span>` : '') +
+      `<button class="step ${cls}" data-action="goto" data-step="${s.key}" ${idx > state.maxStep ? 'disabled' : ''}><span class="num">${idx}</span>${s.label}</button>`;
+  }).join('');
+  $('#topbar').innerHTML = `
+    <div class="brand">${LOGO_SVG}STARTUP <span>RUN</span></div>
+    <nav class="steps">${steps}</nav>
+    <div class="tools">
+      <button class="iconbtn ${state.sound ? '' : 'off'}" data-action="sound" title="Sound on / off (M)">${state.sound ? ICONS.soundOn : ICONS.soundOff}</button>
+      <button class="iconbtn" data-action="fullscreen" title="Full screen (F)">${ICONS.full}</button>
+      <button class="iconbtn" data-action="help" title="Keyboard shortcuts (?)">?</button>
+      ${showSteps ? `<button class="iconbtn" data-action="new-game" title="New game">${ICONS.home}</button>` : ''}
+    </div>`;
+}
+
+/* ---------- Screen 0: title / setup ---------- */
+function renderSetup() {
+  const s = state.setup;
+  const teamBtns = range(7).map(i => i + 2).map(n =>
+    `<button class="${s.numTeams === n ? 'on' : ''}" data-action="set-teams" data-n="${n}">${n}</button>`).join('');
+  const names = range(s.numTeams).map(i => `<div class="name-row">${avatarHTML(i)}
+    <input class="text-input" maxlength="24" data-input="team-name" data-i="${i}" value="${esc(s.names[i])}" aria-label="Name of team ${i + 1}"></div>`).join('');
+  const custom = !BUILD_TIMES.includes(s.buildMin);
+  const buildBtns = BUILD_TIMES.map(m =>
+    `<button class="${s.buildMin === m ? 'on' : ''}" data-action="set-build" data-min="${m}">${m} min</button>`).join('') +
+    `<label class="custom ${custom ? 'on' : ''}">Other: <input class="text-input" type="number" min="1" max="120" data-input="build-custom"
+      value="${custom ? s.buildMin : ''}" placeholder="–"> min</label>`;
+  const pitchBtns = PITCH_TIMES.map(m =>
+    `<button class="${s.pitchMin === m ? 'on' : ''}" data-action="set-pitch" data-min="${m}">${m} min</button>`).join('');
+  return `<section class="screen setup">
+    <div class="hero">${sceneHTML('title')}
+      <h1 class="title">STARTUP <span>RUN</span></h1>
+      <p class="subtitle">Draw. Build. Pitch. Win.</p>
+      <p class="credit">by STRATÉJEUX</p>
+    </div>
+    <div class="setup-panel">
+      <h2>Game setup</h2>
+      <div class="field"><span class="field-label">Number of teams</span><div class="seg">${teamBtns}</div></div>
+      <div class="field"><span class="field-label">Team names</span><div class="names">${names}</div></div>
+      <div class="field"><span class="field-label">Build time</span><div class="seg">${buildBtns}</div></div>
+      <div class="field"><span class="field-label">Pitch time</span><div class="seg">${pitchBtns}</div></div>
+      <button class="btn accent mega" data-action="start">START THE RUN ${ICONS.arrow}</button>
+    </div>
+  </section>`;
+}
+
+function renderResume() {
+  const s = ui.resume;
+  const idx = STEP_INDEX[s.step] || 1;
+  const d = new Date(s.savedAt || Date.now());
+  const when = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) + ' at ' +
+    d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  return `<section class="screen resume">
+    <div class="mascot-big">${MASCOT_SVG}</div>
+    <h1>Continue your run?</h1>
+    <p>Step ${idx}: <b>${STEPS[idx - 1].label}</b> · ${s.teams.length} teams · saved ${esc(when)}</p>
+    <div class="row" style="gap:.4rem">${s.teams.map(t => `<span title="${esc(t.name)}" style="width:3rem;height:3rem;display:inline-block">${avatarHTML(t.avatar)}</span>`).join('')}</div>
+    <div class="row">
+      <button class="btn accent mega" data-action="resume-continue">${ICONS.play} Continue</button>
+      <button class="btn ghost mega" data-action="resume-new">New game</button>
+    </div>
+  </section>`;
+}
+
+/* ---------- Cards ---------- */
+function cardFront(type, idx) {
+  const c = CARDS[type][idx];
+  return `<div class="art">${svgWrap(c.art)}</div><div class="txt"><span class="ctype">${typeLabel(type)}</span><span class="cname${c.name.length > 33 ? ' long' : ''}">${esc(c.name)}</span></div>`;
+}
+function cardHTML(ti, type, withReroll) {
+  const t = state.teams[ti];
+  const v = t.cards[type];
+  return `<div class="card t-${type}${v !== null ? ' revealed' : ''}" data-action="draw" data-team="${ti}" data-type="${type}">
+    <div class="card-inner">
+      <div class="card-face card-back"><div class="back-art">${BACK_SVG}</div><div class="back-label">${typeLabel(type)}</div><div class="slot"></div></div>
+      <div class="card-face card-front">${v !== null ? cardFront(type, v) : ''}</div>
+    </div>
+    ${withReroll && v !== null && !t.rerollUsed ? `<button class="reroll" data-action="reroll" data-team="${ti}" data-type="${type}" title="Re-roll this card">${ICONS.reroll}</button>` : ''}
+  </div>`;
+}
+function chipHTML(t, type) {
+  const v = t.cards[type];
+  const c = v === null ? null : CARDS[type][v];
+  return `<div class="chip t-${type}"><div class="chip-art">${c ? svgWrap(c.art) : ''}</div><div class="chip-name">${c ? esc(c.name) : '?'}</div></div>`;
+}
+
+/* ---------- Screen 1: DRAW ---------- */
+function gridDims(n) {
+  if (n <= 3) return [n, 1];
+  if (n === 4) return [2, 2];
+  if (n <= 6) return [3, 2];
+  return [4, 2];
+}
+function renderDraw() {
+  const [cols, rows] = gridDims(state.teams.length);
+  const remaining = !allReady();
+  return `<section class="screen draw">
+    <div class="screen-head">${sceneHTML('draw')}
+      <div class="grow"><h2>Draw your cards</h2><p>Click a card to draw it. Each team has one re-roll.</p></div>
+      <div class="head-actions">
+        ${remaining ? `<button class="btn ghost big" data-action="draw-all">${ICONS.reroll} Draw all</button>` : ''}
+        ${!remaining ? `<button class="btn accent mega pulse" data-action="lets-build">LET'S BUILD! ${ICONS.arrow}</button>` : ''}
+      </div>
+    </div>
+    <div class="team-grid ${state.teams.length > 4 ? 'dense' : ''}" style="--cols:${cols};--rows:${rows}">${state.teams.map((t, i) => teamPanel(i)).join('')}</div>
+  </section>`;
+}
+function teamPanel(i) {
+  const t = state.teams[i];
+  const ready = isReady(t);
+  return `<div class="team-panel ${ready ? 'ready' : ''}" data-panel="${i}">
+    <div class="tp-head" data-action="zoom" data-team="${i}">${avatarHTML(t.avatar)}<span class="tp-name">${esc(t.name)}</span>
+      ${ready ? '<span class="badge-ready">READY</span>' : ''}
+      <button class="iconbtn zoom-btn" data-action="zoom" data-team="${i}" title="Zoom">${ICONS.zoom}</button></div>
+    <div class="cards-row">${CARD_TYPES.map(c => cardHTML(i, c.key, true)).join('')}</div>
+    <div class="tp-foot">${t.rerollUsed ? 'No re-roll left' : '1 re-roll left'}</div>
+  </div>`;
+}
+
+// Cards not held by any team in this category (draw without replacement)
+function cardPool(type) {
+  const held = new Set(state.teams.map(t => t.cards[type]).filter(v => v !== null));
+  return range(CARDS[type].length).filter(i => !held.has(i));
+}
+async function drawCard(ti, type, { fast = false, reroll = false } = {}) {
+  const t = state.teams[ti];
+  const pool = cardPool(type);
+  if (!pool.length) return;
+  const wasReady = isReady(t);
+  const pick = pool[Math.floor(Math.random() * pool.length)];
+  const els = $$(`.card[data-team="${ti}"][data-type="${type}"]`);
+  if (reroll) {
+    els.forEach(el => { el.classList.remove('revealed'); const b = el.querySelector('.reroll'); if (b) b.remove(); });
+    await wait(550);
+  }
+  // Slot machine: names scroll fast, then slow down
+  els.forEach(el => el.classList.add('rolling'));
+  const names = CARDS[type].map(c => c.name);
+  let k = Math.floor(Math.random() * names.length), delay = fast ? 35 : 45, elapsed = 0;
+  const total = fast ? 650 : 1500;
+  while (elapsed < total) {
+    k = (k + 1) % names.length;
+    els.forEach(el => { el.querySelector('.slot').textContent = names[k]; });
+    Sound.tick();
+    await wait(delay);
+    elapsed += delay;
+    delay = Math.min(delay * 1.12, fast ? 110 : 230);
+  }
+  els.forEach(el => { el.querySelector('.slot').textContent = names[pick]; });
+  await wait(fast ? 120 : 280);
+  // Save, then flip the card
+  t.cards[type] = pick;
+  if (reroll) t.rerollUsed = true;
+  save();
+  els.forEach(el => {
+    el.querySelector('.card-front').innerHTML = cardFront(type, pick);
+    el.classList.remove('rolling');
+    void el.offsetWidth;
+    el.classList.add('revealed');
+  });
+  Sound.reveal();
+  await wait(fast ? 500 : 800);
+  render();
+  if (!wasReady && isReady(t)) {
+    Confetti.burstAt($(`[data-panel="${ti}"]`) || $('.zoom-cards'), 70);
+    Sound.ready();
+    if (allReady()) Mascot.say("Let's build!", 3000);
+  }
+}
+async function runDraw(ti, type, opts) {
+  ui.busy = true;
+  try { await drawCard(ti, type, opts); } finally { ui.busy = false; }
+}
+async function drawAll() {
+  ui.busy = true;
+  try {
+    for (let i = 0; i < state.teams.length; i++) {
+      for (const c of CARD_TYPES) {
+        if (state.teams[i].cards[c.key] === null) await drawCard(i, c.key, { fast: true });
+      }
+    }
+  } finally { ui.busy = false; render(); }
+}
+
+/* ---------- Screen 2: BUILD ---------- */
+function renderBuild() {
+  const n = state.teams.length;
+  return `<section class="screen build" style="--recap-h:${n <= 4 ? '11rem' : '15rem'}">
+    <div class="build-top">
+      <div class="timer-panel">${sceneHTML('build')}
+        <div><div class="timer-label" style="text-align:center">BUILD TIME</div>${timerHTML('build', '8.5rem')}</div>
+      </div>
+      <div class="side">
+        <h3>Your mission</h3>
+        <div class="posters">
+          <div class="poster">${POSTER1_SVG}<div><b>Poster 1:</b>startup name, logo, slogan, your offer</div></div>
+          <div class="poster">${POSTER2_SVG}<div><b>Poster 2:</b>Business Model Canvas</div></div>
+        </div>
+        <h3>You will be scored on</h3>
+        <ul class="crit-mini">${CRITERIA.map(c => `<li>${svgWrap(c.icon, '0 0 100 100')}<div><b>${esc(c.name)}</b>${esc(c.question)}</div></li>`).join('')}</ul>
+        <div class="side-actions">
+          <button class="btn blue" data-action="toolkit">${ICONS.book} Pitch toolkit</button>
+          <button class="btn accent" data-action="go-pitches">GO TO PITCHES ${ICONS.arrow}</button>
+        </div>
+      </div>
+    </div>
+    <div class="recap" style="--cols:${Math.min(n, 4)}">${state.teams.map(t => `<div class="recap-item">
+      <div class="recap-head">${avatarHTML(t.avatar)}<span>${esc(t.name)}</span></div>
+      <div class="chips">${CARD_TYPES.map(c => chipHTML(t, c.key)).join('')}</div></div>`).join('')}</div>
+  </section>`;
+}
+
+/* ---------- Screen 3: PITCH ---------- */
+function renderPitch() { return state.pitch.ordered ? renderPitching() : renderOrder(); }
+
+function renderOrder() {
+  const n = state.teams.length;
+  const hasOrder = state.pitch.order.length === n;
+  const order = hasOrder ? state.pitch.order : range(n);
+  return `<section class="screen order">
+    <div class="order-intro">${sceneHTML('pitch')}
+      <h2>Who goes first?</h2>
+      <p>Drag the teams or use the arrows to change the order.</p>
+      <div class="row">
+        <button class="btn ghost big" data-action="shuffle">${ICONS.reroll} Shuffle again</button>
+        <button class="btn accent big" data-action="start-pitches" ${hasOrder ? '' : 'disabled'}>START PITCHES ${ICONS.arrow}</button>
+      </div>
+    </div>
+    <div class="order-list" id="order-list" style="--n:${n};--row:${Math.min(4.6, 34 / n)}rem">
+      ${range(n).map(ti => {
+        const pos = order.indexOf(ti), t = state.teams[ti];
+        return `<div class="order-item" data-drag="${ti}" style="--pos:${pos}">
+          <span class="pos">${pos + 1}</span><span class="grip">${ICONS.grip}</span>${avatarHTML(t.avatar)}
+          <span class="oname">${esc(displayName(t))}</span>
+          <button class="arrow" data-action="order-move" data-team="${ti}" data-dir="-1" ${pos === 0 ? 'disabled' : ''} title="Move up">${ICONS.up}</button>
+          <button class="arrow" data-action="order-move" data-team="${ti}" data-dir="1" ${pos === n - 1 ? 'disabled' : ''} title="Move down">${ICONS.down}</button>
+        </div>`;
+      }).join('')}
+    </div>
+  </section>`;
+}
+async function runShuffle() {
+  const list = $('#order-list');
+  if (ui.busy || !list) return;
+  ui.busy = true;
+  const n = state.teams.length;
+  const items = $$('#order-list .order-item');
+  list.classList.add('shuffling');
+  const end = Date.now() + 1800;
+  while (Date.now() < end) {
+    const perm = shuffle(range(n));
+    items.forEach((it, k) => it.style.setProperty('--pos', perm[k]));
+    Sound.tick();
+    await wait(140);
+  }
+  const order = shuffle(range(n));
+  items.forEach(it => it.style.setProperty('--pos', order.indexOf(+it.dataset.drag)));
+  state.pitch.order = order;
+  save();
+  await wait(400);
+  ui.busy = false;
+  render();
+  Sound.reveal();
+  Mascot.say(`${displayName(state.teams[order[0]])} goes first!`, 3000);
+}
+function ensureOrder() {
+  if (state.pitch.order.length !== state.teams.length) state.pitch.order = range(state.teams.length);
+}
+
+// Drag and drop in the "Who goes first?" list (pointer events: mouse + touch)
+let drag = null;
+document.addEventListener('pointerdown', e => {
+  const item = e.target.closest('.order-item');
+  if (!item || e.target.closest('button') || ui.busy) return;
+  ensureOrder();
+  const list = $('#order-list');
+  const ti = +item.dataset.drag;
+  const order = state.pitch.order.slice();
+  drag = { item, ti, order, startY: e.clientY, startIdx: order.indexOf(ti), target: order.indexOf(ti),
+    rowPx: list.getBoundingClientRect().height / order.length };
+  item.classList.add('dragging');
+  if (item.setPointerCapture) item.setPointerCapture(e.pointerId);
+  e.preventDefault();
+});
+document.addEventListener('pointermove', e => {
+  if (!drag) return;
+  const dy = e.clientY - drag.startY;
+  const n = drag.order.length;
+  drag.item.style.top = (drag.startIdx * drag.rowPx + dy) + 'px';
+  const target = Math.max(0, Math.min(n - 1, Math.round(drag.startIdx + dy / drag.rowPx)));
+  if (target !== drag.target) {
+    drag.target = target;
+    const others = drag.order.filter(x => x !== drag.ti);
+    others.splice(target, 0, drag.ti);
+    $$('#order-list .order-item').forEach(it => { if (it !== drag.item) it.style.setProperty('--pos', others.indexOf(+it.dataset.drag)); });
+    Sound.tick();
+  }
+});
+function endDrag() {
+  if (!drag) return;
+  const order = drag.order.filter(x => x !== drag.ti);
+  order.splice(drag.target, 0, drag.ti);
+  state.pitch.order = order;
+  drag = null;
+  save();
+  render();
+}
+document.addEventListener('pointerup', endDrag);
+document.addEventListener('pointercancel', endDrag);
+
+function renderPitching() {
+  const p = state.pitch, n = state.teams.length;
+  const ti = p.order[p.current], t = state.teams[ti];
+  const last = p.current === n - 1;
+  return `<section class="screen pitch">
+    <div class="pitch-left">
+      <div class="stage-row">${sceneHTML('pitch')}
+        <div class="grow" style="min-width:0"><div class="now">NOW PITCHING</div>
+          <div class="who">${avatarHTML(t.avatar)}<div style="min-width:0"><div class="pname" id="pname">${esc(displayName(t))}</div><div class="pteam">${esc(t.name)}</div></div></div>
+        </div>
+      </div>
+      <label class="sname">Startup name <input class="text-input" maxlength="28" data-input="startup-name" data-team="${ti}"
+        value="${esc(t.startupName || '')}" placeholder="Optional: type the startup name"></label>
+      <div class="cards-row">${CARD_TYPES.map(c => cardHTML(ti, c.key, false)).join('')}</div>
+    </div>
+    <div class="pitch-right">
+      <div class="pitch-count">Pitch ${p.current + 1} of ${n}</div>
+      <div class="timer-label">PITCH TIME</div>
+      ${timerHTML('pitch', '10rem')}
+      <div class="pitch-actions">
+        <button class="btn ghost" data-action="pitch-prev" ${p.current === 0 ? 'disabled' : ''}>${ICONS.prev} Previous</button>
+        <button class="btn accent big" data-action="score-this">${STAR_SVG(true)} Score this startup</button>
+        <button class="btn ghost" data-action="pitch-next">${last ? 'Go to scores' : 'Next pitch'} ${ICONS.next}</button>
+      </div>
+      <div class="order-strip">${p.order.map((x, k) => {
+        const tx = state.teams[x], done = isScored(tx);
+        return `<button class="strip-item ${k === p.current ? 'current' : ''} ${done ? 'scored' : ''}" data-action="pitch-jump" data-pos="${k}" title="${esc(displayName(tx))}">
+          ${avatarHTML(tx.avatar)}${done ? '<span class="tick">✓</span>' : ''}</button>`;
+      }).join('')}</div>
+      <button class="link-btn" data-action="change-order">Change the order</button>
+    </div>
+  </section>`;
+}
+function setPitch(k) {
+  const p = state.pitch;
+  p.current = Math.max(0, Math.min(state.teams.length - 1, k));
+  timerReset(p.timer, state.setup.pitchMin * 60000);
+  lastLeft.pitch = null;
+  state.step = 'pitch';
+  save();
+  render();
+}
+
+/* ---------- Screen 4: SCORE ---------- */
+function renderScore() { return state.scoreView.team !== null ? renderScoreTeam() : renderSheet(); }
+
+function renderScoreTeam() {
+  const sv = state.scoreView, t = state.teams[sv.team];
+  const total = sv.draft.reduce((a, b) => a + b, 0);
+  return `<section class="screen score-team">
+    <div class="score-head">${sceneHTML('score')}${avatarHTML(t.avatar)}
+      <div class="grow"><h2>${esc(displayName(t))}</h2><p>${esc(t.name)} · 0 = not at all, 5 = excellent</p></div>
+    </div>
+    ${CRITERIA.map((c, i) => {
+      const v = sv.draft[i];
+      return `<div class="crit-row">
+        <div class="crit-icon">${svgWrap(c.icon, '0 0 100 100')}</div>
+        <div class="crit-text"><b>${esc(c.name)}</b><span>${esc(c.question)}</span></div>
+        <div><input type="range" class="big-range" min="0" max="5" step="1" value="${v}" style="--val:${v}" data-input="score" data-c="${i}" aria-label="${esc(c.name)}">
+          <div class="ticks">${range(6).map(k => `<span>${k}</span>`).join('')}</div></div>
+        <div class="crit-val" id="cv-${i}">${v}</div>
+        <div class="stars" id="st-${i}">${range(5).map(k => STAR_SVG(k < v)).join('')}</div>
+      </div>`;
+    }).join('')}
+    <div class="score-foot">
+      <button class="btn ghost big" data-action="score-cancel">Cancel</button>
+      <div class="total">Total <b id="score-total">${total}</b>/ 20</div>
+      <button class="btn accent mega" data-action="score-save">${ICONS.check} Save score</button>
+    </div>
+  </section>`;
+}
+
+function renderSheet() {
+  const complete = allScored();
+  return `<section class="screen sheet">
+    <div class="screen-head">${sceneHTML('score')}
+      <div class="grow"><h2>Score sheet</h2><p>You can change any score. Totals stay hidden until the big reveal!</p></div>
+      <div class="head-actions">
+        ${state.pitch.ordered ? `<button class="btn ghost" data-action="back-pitch">${ICONS.prev} Back to pitches</button>` : ''}
+        <div style="text-align:center">
+          <button class="btn accent mega ${complete ? 'pulse' : ''}" data-action="reveal" ${complete ? '' : 'disabled'}>REVEAL THE WINNER</button>
+          ${complete ? '' : '<div class="hint">Every team needs its 4 scores.</div>'}
+        </div>
+      </div>
+    </div>
+    <div class="sheet-wrap"><table class="sheet-table">
+      <thead><tr><th style="text-align:left">Team</th>${CRITERIA.map(c => `<th>${svgWrap(c.icon, '0 0 100 100')}${esc(c.name)}</th>`).join('')}<th></th></tr></thead>
+      <tbody>${state.teams.map((t, i) => `<tr>
+        <td><div class="sheet-team">${avatarHTML(t.avatar)}<div><b>${esc(displayName(t))}</b>${(t.startupName || '').trim() ? `<small>${esc(t.name)}</small>` : ''}</div></div></td>
+        ${t.scores.map((v, c) => `<td><select class="score-sel ${v === null ? 'empty' : ''}" data-change="sheet-score" data-team="${i}" data-c="${c}" aria-label="${esc(CRITERIA[c].name)}">
+          ${v === null ? '<option value="" selected>–</option>' : ''}${range(6).map(k => `<option value="${k}" ${v === k ? 'selected' : ''}>${k}</option>`).join('')}</select></td>`).join('')}
+        <td><div class="status-cell">${isScored(t) ? '<span class="tag-ok">✓ Scored</span>' : '<span class="tag-missing">Not scored yet</span>'}
+          <button class="btn blue small" data-action="score-open" data-team="${i}">${ICONS.edit} ${isScored(t) ? 'Edit' : 'Score'}</button></div></td>
+      </tr>`).join('')}</tbody>
+    </table></div>
+  </section>`;
+}
+function openScoring(ti, from) {
+  timerPause(state.pitch.timer);
+  state.scoreView = { team: ti, from, draft: state.teams[ti].scores.map(v => v === null ? 0 : v) };
+  state.step = 'score';
+  state.maxStep = Math.max(state.maxStep, 4);
+  save();
+  render();
+}
+
+/* ---------- Screen 5: WINNER ---------- */
+// Competition ranking: equal totals share the same place (1, 2, 2, 4...)
+function computeRanking() {
+  const arr = state.teams.map((t, i) => ({ i, total: sumScores(t) }));
+  arr.sort((a, b) => b.total - a.total || a.i - b.i);
+  arr.forEach(r => {
+    r.rank = 1 + arr.filter(o => o.total > r.total).length;
+    r.shared = arr.filter(o => o.total === r.total).length > 1;
+  });
+  return arr;
+}
+function renderWinner() {
+  const r = state.result;
+  if (!r) return renderSheet();
+  if (r.phase === 'vote') return renderVote();
+  if (r.phase === 'final') return renderFinal();
+  return renderRanking();
+}
+function renderRanking() {
+  const r = state.result;
+  const rk = computeRanking();
+  const tie = rk.filter(x => x.rank === 1).length > 1;
+  const rows = rk.map(x => {
+    const t = state.teams[x.i];
+    return `<div class="rank-row ${x.rank === 1 ? 'first' : ''}">
+      <div class="rank-pos">${ordinal(x.rank)}${x.shared ? '<small>SHARED</small>' : ''}</div>${avatarHTML(t.avatar)}
+      <div class="rank-name"><b>${esc(displayName(t))}</b><small>${esc(t.name)}</small></div>
+      <div class="bars">${CRITERIA.map((c, k) => `<div class="bar" title="${esc(c.name)}: ${t.scores[k]}/5">${svgWrap(c.icon, '0 0 100 100')}<span class="track"><i style="--w:${t.scores[k] * 20}%"></i></span></div>`).join('')}</div>
+      <div class="rank-total">${x.total}<small> /20</small></div>
+    </div>`;
+  }).join('');
+  const podium = [2, 1, 3].map(rank => {
+    const g = rk.filter(x => x.rank === rank);
+    if (!g.length) return '';
+    return `<div class="pod-col pod-${rank} ${g.length > 2 ? 'many' : ''}">
+      <div class="pod-avatars">${g.map(x => `<div class="pa">${avatarHTML(state.teams[x.i].avatar)}<small>${esc(displayName(state.teams[x.i]))}</small></div>`).join('')}</div>
+      <div class="pod-step">${rank}</div></div>`;
+  }).join('');
+  let actions;
+  if (r.winner !== null) actions = `<button class="btn accent mega" data-action="back-final">STARTUP OF THE YEAR ${ICONS.arrow}</button>`;
+  else if (tie) actions = `<div class="tie-banner">It's a tie for first place!</div><button class="btn accent mega pulse" data-action="final-vote">FINAL VOTE ${ICONS.arrow}</button>`;
+  else actions = `<button class="btn accent mega pulse" data-action="show-final">AND THE WINNER IS… ${ICONS.arrow}</button>`;
+  return `<section class="screen results ${r.animated ? '' : 'animating'}">
+    <div class="ranking"><h2>The results</h2>${rows}</div>
+    <div class="results-side"><div class="podium">${podium}</div><div class="results-actions">${actions}</div></div>
+  </section>`;
+}
+async function runRankingAnimation() {
+  if (ui.busy) return;
+  ui.busy = true;
+  Mascot.say('Drumroll, please!', 2600);
+  Sound.drumroll(2.4);
+  await wait(2700);
+  const rows = $$('.results .rank-row');
+  for (let k = rows.length - 1; k >= 0; k--) {
+    if (k === 0 && rows.length > 1) { Sound.drumroll(1); await wait(1100); }
+    rows[k].classList.add('show');
+    if (k === 0) { Sound.reveal(); Confetti.burstAt(rows[0], 80); } else Sound.pop();
+    await wait(k === 0 ? 900 : 750);
+  }
+  const pod = $('.podium');
+  if (pod) pod.classList.add('up');
+  Sound.ready();
+  await wait(1400);
+  state.result.animated = true;
+  save();
+  ui.busy = false;
+  render();
+  if (computeRanking().filter(x => x.rank === 1).length > 1) { Mascot.say("It's a tie!", 3500); Sound.alert(); }
+}
+
+function voteWinners(v) {
+  const max = Math.max(...v.candidates.map(i => v.votes[i] || 0));
+  return v.candidates.filter(i => (v.votes[i] || 0) === max);
+}
+function renderVote() {
+  const v = state.result.vote;
+  const winners = v.revealed ? voteWinners(v) : [];
+  const cards = v.candidates.map(i => {
+    const t = state.teams[i], cnt = v.votes[i] || 0;
+    const cls = !v.revealed ? '' : winners.length === 1 && winners[0] === i ? 'win' : winners.includes(i) ? '' : 'lose';
+    const body = v.revealed
+      ? `<div class="vc-count">${cnt}<small> ${cnt === 1 ? 'vote' : 'votes'}</small></div>`
+      : `<div class="vote-ctrl">
+          <button data-action="vote-step" data-team="${i}" data-d="-1" aria-label="Remove a vote">−</button>
+          <input class="text-input" type="password" inputmode="numeric" autocomplete="off" maxlength="2" data-input="vote" data-team="${i}" value="${cnt}" aria-label="Votes">
+          <button data-action="vote-step" data-team="${i}" data-d="1" aria-label="Add a vote">+</button>
+        </div><div class="vc-hidden">VOTES ARE HIDDEN</div>`;
+    return `<div class="vote-card ${cls}">${avatarHTML(t.avatar)}<div class="vc-name">${esc(displayName(t))}</div><div class="vc-team">${esc(t.name)}</div>${body}</div>`;
+  }).join('');
+  let actions;
+  if (!v.revealed) actions = `<button class="btn accent mega" data-action="vote-reveal">REVEAL ${ICONS.arrow}</button>`;
+  else if (winners.length === 1) actions = `<button class="btn accent mega pulse" data-action="show-final">STARTUP OF THE YEAR ${ICONS.arrow}</button>`;
+  else actions = `<div class="tie-banner">Still a tie!</div><button class="btn accent mega pulse" data-action="vote-again">${ICONS.reroll} Vote again</button>`;
+  return `<section class="screen vote">
+    <h2>Final vote${v.round > 1 ? ` · round ${v.round}` : ''}</h2>
+    <div class="rule">Raise your hand for the best startup. You cannot vote for your own team.</div>
+    <div class="vote-grid">${cards}</div>
+    <div class="vote-actions">${actions}</div>
+  </section>`;
+}
+async function revealVote() {
+  ui.busy = true;
+  Mascot.say('And the winner is…', 2200);
+  Sound.drumroll(1.8);
+  await wait(2000);
+  const r = state.result, v = r.vote;
+  v.revealed = true;
+  const winners = voteWinners(v);
+  if (winners.length === 1) { r.winner = winners[0]; r.byVote = true; }
+  save();
+  ui.busy = false;
+  render();
+  if (winners.length === 1) { Sound.reveal(); Confetti.burstAt($('.vote-card.win'), 120); }
+  else { Sound.alert(); Mascot.say("It's still a tie!", 3000); }
+}
+async function showFinal() {
+  const r = state.result;
+  if (r.winner === null) r.winner = computeRanking()[0].i;
+  ui.busy = true;
+  Mascot.say('And the winner is…', 2400);
+  Sound.drumroll(2);
+  await wait(2300);
+  r.phase = 'final';
+  save();
+  ui.busy = false;
+  render();
+  celebrate();
+}
+function celebrate() {
+  Confetti.rain(300);
+  setTimeout(() => Confetti.rain(200), 1300);
+  Sound.applause(5);
+  Mascot.say('Congratulations!', 3500);
+}
+function renderFinal() {
+  const r = state.result, t = state.teams[r.winner];
+  return `<section class="screen final">
+    <div class="final-kicker">STARTUP OF THE YEAR</div>
+    ${sceneHTML('results')}
+    <div class="final-name">${esc(displayName(t))}</div>
+    <div class="final-team">${avatarHTML(t.avatar)}${esc(t.name)}</div>
+    ${r.byVote ? '<div class="final-note">Winner after a final vote</div>' : ''}
+    <div class="final-actions">
+      <button class="btn ghost big" data-action="see-ranking">See the ranking</button>
+      <button class="btn accent big" data-action="new-game">${ICONS.home} New game</button>
+    </div>
+  </section>`;
+}
+
+/* ---------- Modals ---------- */
+function renderModal() {
+  const root = $('#modal-root');
+  const m = ui.modal;
+  if (!m) { root.innerHTML = ''; root.dataset.key = ''; return; }
+  const close = `<button class="iconbtn close" data-action="close-modal" title="Close (Esc)">${ICONS.close}</button>`;
+  let html = '';
+  if (m.type === 'zoom') {
+    const t = state.teams[m.team], drawing = state.step === 'draw';
+    html = `<div class="modal dark">${close}
+      <div class="zoom-head">${avatarHTML(t.avatar)}<h2>${esc(displayName(t))}</h2>${isReady(t) ? '<span class="badge-ready">READY</span>' : ''}</div>
+      <div class="zoom-cards"><div class="cards-row">${CARD_TYPES.map(c => cardHTML(m.team, c.key, drawing)).join('')}</div></div>
+      <div class="zoom-foot">${drawing ? (t.rerollUsed ? 'No re-roll left' : '1 re-roll left') : ''}</div></div>`;
+  } else if (m.type === 'toolkit') {
+    html = `<div class="modal">${close}<h2>Pitch toolkit: useful phrases</h2>
+      <ul class="toolkit">${TOOLKIT.map(p => `<li>${esc(p)}</li>`).join('')}</ul></div>`;
+  } else if (m.type === 'help') {
+    html = `<div class="modal">${close}<h2>Keyboard shortcuts</h2><div class="keys">
+      <kbd>Space</kbd><span>Start / pause the timer</span><kbd>F</kbd><span>Full screen</span>
+      <kbd>M</kbd><span>Sound on / off</span><kbd>?</kbd><span>Show this help</span><kbd>Esc</kbd><span>Close a window</span></div>
+      <p style="margin-top:1rem;font-weight:700;color:var(--muted)">The game is saved automatically. You can close the browser and continue later.</p></div>`;
+  } else if (m.type === 'confirm') {
+    html = `<div class="modal"><h2>${esc(m.title)}</h2><p class="confirm-text">${esc(m.text)}</p>
+      <div class="modal-actions"><button class="btn" style="background:var(--soft)" data-action="close-modal">Cancel</button>
+      <button class="btn accent big" data-action="confirm-yes">${esc(m.yes)}</button></div></div>`;
+  }
+  const key = m.type + (m.team ?? '');
+  root.innerHTML = `<div class="modal-bg" data-action="modal-bg"${root.dataset.key === key ? ' style="animation:none"' : ''}>${html}</div>`;
+  if (root.dataset.key === key) root.querySelector('.modal').style.animation = 'none';
+  root.dataset.key = key;
+}
+function openModal(m) { ui.modal = m; renderModal(); }
+function closeModal() { ui.modal = null; renderModal(); }
+function confirmBox(title, text, yes, onYes) { openModal({ type: 'confirm', title, text, yes, onYes }); }
+
+/* =====================================================================
+   ACTIONS
+   ===================================================================== */
+function startGame() {
+  const s = state.setup;
+  state.teams = range(s.numTeams).map(i => ({
+    name: (s.names[i] || '').trim() || `Team ${i + 1}`, avatar: i,
+    cards: { theme: null, target: null, constraint: null }, rerollUsed: false,
+    startupName: '', scores: [null, null, null, null]
+  }));
+  state.build = { timer: makeTimer(s.buildMin) };
+  state.pitch = { order: [], ordered: false, current: 0, timer: makeTimer(s.pitchMin) };
+  state.scoreView = { team: null, from: null, draft: null };
+  state.result = null;
+  state.step = 'draw';
+  state.maxStep = 1;
+  save();
+  render();
+  Sound.reveal();
+  Mascot.say('Ready?', 2500);
+}
+function gotoStep(key) {
+  const idx = STEP_INDEX[key];
+  if (idx > state.maxStep) return;
+  const go = () => {
+    if (key === 'winner' && !state.result) { startResults(); return; }
+    state.step = key;
+    if (key === 'score') state.scoreView = { team: null, from: null, draft: null };
+    save();
+    render();
+  };
+  if (state.step === 'winner' && key !== 'winner' && state.result) {
+    confirmBox('Go back?', 'The results and the final vote will be reset.', 'Yes, go back', () => {
+      state.result = null;
+      state.maxStep = 4;
+      go();
+    });
+  } else go();
+}
+function startResults() {
+  if (!allScored()) return;
+  state.result = { phase: 'ranking', animated: false, vote: null, winner: null, byVote: false };
+  state.step = 'winner';
+  state.maxStep = 5;
+  save();
+  render();
+}
+function toggleSound() {
+  state.sound = !state.sound;
+  Sound.ensure();
+  Sound.setEnabled(state.sound);
+  save();
+  renderHeader();
+  if (state.sound) Sound.click();
+}
+function toggleFullscreen() {
+  const d = document, el = d.documentElement;
+  try {
+    const fs = d.fullscreenElement || d.webkitFullscreenElement;
+    const p = !fs ? (el.requestFullscreen || el.webkitRequestFullscreen).call(el) : (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+    if (p && p.catch) p.catch(() => {});
+  } catch (e) { /* fullscreen not available */ }
+}
+function currentTimerKind() {
+  if (state.step === 'build') return 'build';
+  if (state.step === 'pitch' && state.pitch.ordered) return 'pitch';
+  return null;
+}
+function newGame() {
+  confirmBox('New game?', 'The current game will be deleted.', 'Yes, new game', () => {
+    clearSave();
+    state = newState(state.sound, state.setup);
+    lastLeft.build = lastLeft.pitch = null;
+    save();
+    render();
+  });
+}
+
+const ACTIONS = {
+  'set-teams': el => { state.setup.numTeams = +el.dataset.n; save(); render(); },
+  'set-build': el => { state.setup.buildMin = +el.dataset.min; save(); render(); },
+  'set-pitch': el => { state.setup.pitchMin = +el.dataset.min; save(); render(); },
+  start: startGame,
+  'resume-continue': () => {
+    state = restoreTimers(ui.resume);
+    ui.resume = null;
+    lastLeft.build = lastLeft.pitch = null;
+    save();
+    render();
+    Sound.reveal();
+  },
+  'resume-new': () => {
+    const setup = ui.resume.setup || defaultSetup();
+    ui.resume = null;
+    clearSave();
+    state = newState(state.sound, setup);
+    save();
+    render();
+  },
+  draw: el => {
+    const ti = +el.dataset.team, type = el.dataset.type;
+    if (state.teams[ti].cards[type] === null) {
+      if (state.step === 'draw') runDraw(ti, type);
+    } else if (!ui.modal) openModal({ type: 'zoom', team: ti });
+  },
+  reroll: (el, e) => {
+    e.stopPropagation();
+    const t = state.teams[+el.dataset.team];
+    if (!t.rerollUsed && state.step === 'draw') runDraw(+el.dataset.team, el.dataset.type, { reroll: true });
+  },
+  'draw-all': drawAll,
+  zoom: el => openModal({ type: 'zoom', team: +el.dataset.team }),
+  'close-modal': closeModal,
+  'modal-bg': (el, e) => { if (e.target === el) closeModal(); },
+  'confirm-yes': () => { const fn = ui.modal && ui.modal.onYes; closeModal(); if (fn) fn(); },
+  'lets-build': () => {
+    state.step = 'build';
+    state.maxStep = Math.max(state.maxStep, 2);
+    save(); render();
+    Mascot.say("Let's build!", 2500);
+  },
+  'timer-toggle': el => toggleTimer(el.dataset.kind),
+  'timer-add': el => {
+    const kind = el.dataset.kind, t = getTimer(kind);
+    const left = Math.max(0, timeLeft(t) + (+el.dataset.ms));
+    if (t.running) t.endAt = Date.now() + left; else t.remaining = left;
+    if (left > 0) t.done = false;
+    lastLeft[kind] = left;
+    Sound.click();
+    save();
+    if (left === 0 && !t.done) finishTimer(kind); else updateTimerDOM(kind);
+  },
+  'timer-reset': el => {
+    const kind = el.dataset.kind, t = getTimer(kind);
+    timerReset(t);
+    lastLeft[kind] = null;
+    Sound.click(); save(); updateTimerDOM(kind);
+  },
+  toolkit: () => openModal({ type: 'toolkit' }),
+  'go-pitches': () => {
+    const t = state.build.timer;
+    const go = () => { timerPause(t); state.step = 'pitch'; state.maxStep = Math.max(state.maxStep, 3); save(); render(); };
+    if (!t.done) confirmBox('Go to the pitches?', 'The build time is not over yet.', 'Yes, go!', go); else go();
+  },
+  shuffle: runShuffle,
+  'order-move': el => {
+    ensureOrder();
+    const o = state.pitch.order, ti = +el.dataset.team;
+    const a = o.indexOf(ti), b = a + (+el.dataset.dir);
+    if (b < 0 || b >= o.length) return;
+    [o[a], o[b]] = [o[b], o[a]];
+    Sound.click(); save(); render();
+  },
+  'start-pitches': () => {
+    state.pitch.ordered = true;
+    setPitch(0);
+    Mascot.say('Ready?', 2200);
+  },
+  'change-order': () => { timerPause(state.pitch.timer); state.pitch.ordered = false; save(); render(); },
+  'pitch-prev': () => setPitch(state.pitch.current - 1),
+  'pitch-jump': el => setPitch(+el.dataset.pos),
+  'pitch-next': () => {
+    const p = state.pitch;
+    if (p.current < state.teams.length - 1) { setPitch(p.current + 1); return; }
+    timerPause(p.timer);
+    state.step = 'score';
+    state.scoreView = { team: null, from: null, draft: null };
+    state.maxStep = Math.max(state.maxStep, 4);
+    save(); render();
+  },
+  'back-pitch': () => { state.step = 'pitch'; save(); render(); },
+  'score-this': () => openScoring(state.pitch.order[state.pitch.current], 'pitch'),
+  'score-open': el => openScoring(+el.dataset.team, 'sheet'),
+  'score-save': () => {
+    const sv = state.scoreView;
+    state.teams[sv.team].scores = sv.draft.slice();
+    state.scoreView = { team: null, from: null, draft: null };
+    Sound.ready();
+    Mascot.say('Great pitch!', 2200);
+    if (sv.from === 'pitch' && state.pitch.current < state.teams.length - 1) { setPitch(state.pitch.current + 1); return; }
+    state.step = 'score';
+    save(); render();
+  },
+  'score-cancel': () => {
+    const from = state.scoreView.from;
+    state.scoreView = { team: null, from: null, draft: null };
+    state.step = from === 'pitch' ? 'pitch' : 'score';
+    save(); render();
+  },
+  reveal: startResults,
+  'final-vote': () => {
+    const r = state.result;
+    if (!r.vote) r.vote = { round: 1, candidates: computeRanking().filter(x => x.rank === 1).map(x => x.i), votes: {}, revealed: false };
+    r.phase = 'vote';
+    save(); render();
+  },
+  'vote-step': el => {
+    const v = state.result.vote, i = +el.dataset.team;
+    v.votes[i] = Math.max(0, Math.min(99, (v.votes[i] || 0) + (+el.dataset.d)));
+    const input = document.querySelector(`input[data-input="vote"][data-team="${i}"]`);
+    if (input) input.value = v.votes[i];
+    Sound.click(); save();
+  },
+  'vote-reveal': revealVote,
+  'vote-again': () => {
+    const v = state.result.vote;
+    state.result.vote = { round: v.round + 1, candidates: voteWinners(v), votes: {}, revealed: false };
+    save(); render();
+  },
+  'show-final': showFinal,
+  'back-final': () => { state.result.phase = 'final'; save(); render(); },
+  'see-ranking': () => { state.result.phase = 'ranking'; save(); render(); },
+  goto: el => gotoStep(el.dataset.step),
+  sound: toggleSound,
+  fullscreen: toggleFullscreen,
+  help: () => openModal({ type: 'help' }),
+  'new-game': newGame
+};
+
+const INPUTS = {
+  'team-name': el => { state.setup.names[+el.dataset.i] = el.value; save(); },
+  'build-custom': el => {
+    const v = parseInt(el.value, 10);
+    if (!(v >= 1 && v <= 120)) return;
+    state.setup.buildMin = v;
+    save();
+    $$('[data-action="set-build"]').forEach(b => b.classList.toggle('on', +b.dataset.min === v));
+    el.parentElement.classList.toggle('on', !BUILD_TIMES.includes(v));
+  },
+  'startup-name': el => {
+    const t = state.teams[+el.dataset.team];
+    t.startupName = el.value;
+    save();
+    const p = $('#pname');
+    if (p) p.textContent = displayName(t);
+  },
+  score: el => {
+    const c = +el.dataset.c, v = +el.value, d = state.scoreView.draft;
+    if (d[c] === v) return;
+    d[c] = v;
+    el.style.setProperty('--val', v);
+    $('#cv-' + c).textContent = v;
+    $('#st-' + c).innerHTML = range(5).map(k => STAR_SVG(k < v)).join('');
+    $('#score-total').textContent = d.reduce((a, b) => a + b, 0);
+    Sound.tick();
+    save();
+  },
+  vote: el => {
+    el.value = el.value.replace(/\D/g, '');
+    state.result.vote.votes[+el.dataset.team] = Math.min(99, parseInt(el.value, 10) || 0);
+    save();
+  }
+};
+const CHANGES = {
+  'sheet-score': el => {
+    if (el.value === '') return;
+    state.teams[+el.dataset.team].scores[+el.dataset.c] = +el.value;
+    save(); render();
+  },
+  'build-custom': () => render()
+};
+
+/* =====================================================================
+   EVENTS + START
+   ===================================================================== */
+const ALWAYS_OK = new Set(['sound', 'fullscreen', 'help', 'close-modal', 'modal-bg']);
+document.addEventListener('click', e => {
+  Sound.ensure();
+  const el = e.target.closest('[data-action]');
+  if (!el || el.disabled) return;
+  const name = el.dataset.action;
+  if (ui.busy && !ALWAYS_OK.has(name)) return;
+  if (ACTIONS[name]) ACTIONS[name](el, e);
+});
+document.addEventListener('input', e => {
+  const el = e.target.closest('[data-input]');
+  if (el && INPUTS[el.dataset.input]) INPUTS[el.dataset.input](el);
+});
+document.addEventListener('change', e => {
+  const el = e.target;
+  const key = el.dataset && (el.dataset.change || el.dataset.input);
+  if (key && CHANGES[key]) CHANGES[key](el);
+});
+document.addEventListener('keydown', e => {
+  const tag = e.target.tagName;
+  const typing = tag === 'TEXTAREA' || tag === 'SELECT' || (tag === 'INPUT' && e.target.type !== 'range');
+  if (e.key === 'Escape') { if (ui.modal) { closeModal(); e.preventDefault(); } return; }
+  if (typing || e.ctrlKey || e.metaKey || e.altKey) return;
+  Sound.ensure();
+  if (e.code === 'Space' || e.key === ' ') {
+    e.preventDefault();
+    const kind = currentTimerKind();
+    if (kind && !ui.modal && !ui.resume) toggleTimer(kind);
+  } else if (e.key === 'f' || e.key === 'F') toggleFullscreen();
+  else if (e.key === 'm' || e.key === 'M') toggleSound();
+  else if (e.key === '?') openModal({ type: 'help' });
+});
+
+function init() {
+  $('#mascot-art').innerHTML = MASCOT_SVG;
+  Confetti.init();
+  const saved = loadSaved();
+  if (saved) {
+    state.sound = saved.sound !== false;
+    if (saved.step !== 'setup' && saved.teams && saved.teams.length) ui.resume = saved;
+    else state = saved;
+  }
+  render();
+  setInterval(tick, 200);
+  // While a timer runs, save regularly so a closed page resumes at the right time
+  setInterval(() => { if (state.build.timer.running || state.pitch.timer.running) save(); }, 5000);
+  window.addEventListener('pagehide', () => save());
+  document.addEventListener('visibilitychange', () => { if (document.hidden) save(); });
+}
+init();
+</script>
+</body>
+</html>
